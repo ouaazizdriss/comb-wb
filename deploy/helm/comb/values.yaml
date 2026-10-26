@@ -1,0 +1,43 @@
+image:
+  repository: comb
+  tag: "1.5.0"
+  pullPolicy: IfNotPresent
+
+replicaCount: 1
+
+# Public URL users open (cookies are Secure when it is https).
+publicUrl: https://comb.example.internal
+
+# Existing Secret holding: COMB_DATABASE_URL, COMB_MIGRATION_DATABASE_URL, COMB_MASTER_KEY.
+# Create it out of band (sealed-secrets, external-secrets, vault...). The chart never templates secrets.
+existingSecret: comb-secrets
+
+# Exact addresses/CIDR of your ingress controller (the only hop allowed to set X-Forwarded-For).
+# Too broad a range lets any pod spoof client IPs and get around the IP allowlist. Empty = trust no proxy.
+trustProxy: ""
+
+# Only these pods may connect to Comb (the NetworkPolicy). Point it at your ingress controller.
+ingressFrom:
+  namespaceLabels: { kubernetes.io/metadata.name: ingress-nginx }
+  podLabels: { app.kubernetes.io/name: ingress-nginx }
+
+statementTimeoutMs: 60000
+maxResultRows: 5000
+
+persistence:
+  enabled: true
+  size: 20Gi
+  storageClass: ""
+
+resources:
+  requests: { cpu: 250m, memory: 512Mi }
+  limits: { memory: 1Gi }
+
+service:
+  port: 8080
+
+ingress:
+  enabled: false
+  className: ""
+  host: comb.example.internal
+  tlsSecret: comb-tls

@@ -1,0 +1,38 @@
+/* Design tokens, carried over unchanged from the Comb mockup. */
+html{--type-numeric:#5B9DD9;--type-text:#8A99A4;--type-temporal:#A98BD6;--type-boolean:#4FB3A5;--type-structured:#D9A441;--type-identifier:#D97E8A;--type-other:#6E7F8A;--state-success:#4FB3A5;--state-running:#D9A441;--state-error:#E0697A;--state-info:#5B9DD9;--state-null:#56666F;--danger:#E0697A;--shadow:0 8px 24px rgb(0 0 0 / 0.35);
+  --mono:'IBM Plex Mono',ui-monospace,monospace;--cond:'IBM Plex Sans Condensed','IBM Plex Sans',sans-serif;--sans:'IBM Plex Sans',system-ui,sans-serif}
+html[data-theme="dark"]{--bg-base:#10151A;--bg-raised:#161C22;--bg-overlay:#1C242B;--bg-inset:#0B0F13;--bg-hover:#1F2830;--bg-selected:#24313B;--border-subtle:#212B33;--border-strong:#33414C;--text-primary:#E4EAEF;--text-secondary:#9AAAB6;--text-muted:#64757F;--text-inverse:#10151A;--btn-primary:#E4EAEF;--shadow:0 8px 24px rgb(0 0 0 / 0.35);color-scheme:dark}
+html[data-theme="light"]{--bg-base:#F5F7F7;--bg-raised:#FFFFFF;--bg-overlay:#FFFFFF;--bg-inset:#ECEFEF;--bg-hover:#EBEEEE;--bg-selected:#DDE4E6;--border-subtle:#E2E6E6;--border-strong:#C4CCCC;--text-primary:#101619;--text-secondary:#4A585F;--text-muted:#7C8A90;--text-inverse:#FFFFFF;--btn-primary:#101619;--shadow:0 8px 24px rgb(0 0 0 / 0.10);color-scheme:light}
+*{box-sizing:border-box}
+html,body,#root{height:100%}
+body{margin:0;background:var(--bg-base);color:var(--text-primary);font-family:var(--sans);font-size:13px;-webkit-font-smoothing:antialiased}
+input,button,select,textarea{font-family:inherit;font-size:inherit;color:inherit;background:none;border:none;outline:none}
+button{cursor:pointer;padding:0}
+button:disabled{cursor:not-allowed;opacity:.55}
+a{color:var(--state-info);text-decoration:none}
+a:hover{color:var(--text-primary);text-decoration:underline}
+:focus-visible{outline:2px solid var(--state-info);outline-offset:2px}
+@keyframes combpulse{0%,100%{opacity:1}50%{opacity:.28}}
+@keyframes combshimmer{0%{opacity:.5}50%{opacity:.9}100%{opacity:.5}}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:6px;border:3px solid transparent;background-clip:content-box}
+::-webkit-scrollbar-track{background:transparent}
+::placeholder{color:var(--text-muted)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* Shared utility classes used across screens (mirrors recurring mockup styles). */
+.mono{font-family:var(--mono)}
+.cond{font-family:var(--cond);font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.label{font-family:var(--cond);font-size:11px;line-height:14px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted)}
+.muted{color:var(--text-muted)}
+.secondary{color:var(--text-secondary)}
+.hov:hover{background:var(--bg-hover)}
+.hov-text:hover{color:var(--text-primary)!important}
+.row-hover:hover{background:var(--bg-hover)}
+.screen{flex:1;min-height:0;overflow:auto}
+.toolbar{height:38px;flex:none;display:flex;align-items:center;gap:8px;padding:0 12px;border-bottom:1px solid var(--border-subtle);background:var(--bg-raised)}
+.panel{border:1px solid var(--border-subtle);border-radius:3px;background:var(--bg-raised)}
+.inset{border:1px solid var(--border-subtle);border-radius:3px;background:var(--bg-inset)}
+.spacer{flex:1}
+pre.code{margin:0;font-family:var(--mono);font-size:12px;line-height:18px;white-space:pre;color:var(--text-primary)}
+.skeleton{background:var(--bg-hover);border-radius:2px;animation:combshimmer 1.4s ease-in-out infinite}

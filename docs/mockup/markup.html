@@ -1,0 +1,2631 @@
+</helmet>
+<div style="height:100vh;display:flex;flex-direction:column;overflow:hidden;background:var(--bg-base)">
+
+<sc-if value="{{ isLauncher }}" hint-placeholder-val="{{ true }}">
+<div style="flex:1;overflow:auto;display:flex;justify-content:center;padding:72px 24px 40px">
+<div style="width:100%;max-width:760px">
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:28px">
+<div style="display:flex;align-items:center;gap:10px">
+<div style="width:22px;height:22px;border:1.5px solid var(--text-primary);border-radius:3px;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr">
+<div style="border-right:1.5px solid var(--text-primary);border-bottom:1.5px solid var(--text-primary)"></div><div style="border-bottom:1.5px solid var(--text-primary)"></div><div style="border-right:1.5px solid var(--text-primary)"></div><div></div>
+</div>
+<div style="font-size:20px;line-height:26px;font-weight:600;letter-spacing:-0.01em">Comb</div>
+</div>
+<div style="display:flex;align-items:center;gap:8px">
+<button sc-camel-on-click="{{ toggleTheme }}" title="Theme" style="width:28px;height:28px;border:1px solid var(--border-subtle);border-radius:3px;color:var(--text-secondary);display:grid;place-items:center;font-size:13px" style-hover="background:var(--bg-hover);color:var(--text-primary)">◐</button>
+<button sc-camel-on-click="{{ newConn }}" style="height:28px;padding:0 12px;border-radius:3px;background:var(--btn-primary);color:var(--text-inverse);font-size:13px;font-weight:500">+ New connection</button>
+</div>
+</div>
+<div style="display:flex;align-items:center;gap:8px;height:34px;padding:0 10px;background:var(--bg-raised);border:1px solid var(--border-subtle);border-radius:3px;margin-bottom:26px">
+<span style="color:var(--text-muted);font-size:13px">⌕</span>
+<input value="{{ search }}" sc-camel-on-change="{{ onSearch }}" placeholder="Search connections" style="flex:1;font-size:13px;color:var(--text-primary)">
+<span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted);border:1px solid var(--border-subtle);border-radius:3px;padding:1px 5px">⌘K</span>
+</div>
+<sc-if value="{{ firstRun }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:20px;padding:20px 0">
+<div style="display:flex;flex-direction:column;gap:6px">
+<div style="font-size:28px;line-height:34px;font-weight:600;letter-spacing:-0.01em">No connections yet.</div>
+<div style="font-size:15px;line-height:22px;color:var(--text-secondary);max-width:520px">Comb needs one Postgres database to be useful. Paste a connection string and it fills in the rest — host, port, database, user.</div>
+</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<button sc-camel-on-click="{{ newConn }}" style="height:32px;padding:0 14px;border-radius:3px;background:var(--btn-primary);color:var(--text-inverse);font-size:13px;font-weight:500">Add a connection</button>
+<button sc-camel-on-click="{{ loadDemo }}" style="height:32px;padding:0 14px;border:1px solid var(--border-strong);border-radius:3px;font-size:13px" style-hover="background:var(--bg-hover)">Load the demo database</button>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;margin-top:6px">
+<sc-for list="{{ onboardSteps }}" as="s" hint-placeholder-count="3">
+<div style="display:flex;flex-direction:column;gap:5px;padding:12px;border:1px solid var(--border-subtle);border-radius:3px;background:var(--bg-raised)">
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-muted)">{{ s.n }}</span>
+<span style="font-size:13px;line-height:18px;font-weight:500">{{ s.title }}</span>
+<span style="font-size:12px;line-height:17px;color:var(--text-secondary)">{{ s.body }}</span>
+</div>
+</sc-for>
+</div>
+<div style="font-size:12px;line-height:17px;color:var(--text-muted);max-width:520px;padding-top:6px;border-top:1px solid var(--border-subtle)">Credentials are encrypted at rest on this server and never sent to the browser. A connection tagged <span style="font-family:'IBM Plex Mono',monospace">prod</span> opens read-only until you say otherwise.</div>
+</div>
+</sc-if>
+<sc-for list="{{ connGroups }}" as="grp" hint-placeholder-count="2">
+<div style="margin-bottom:26px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;line-height:14px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px">{{ grp.label }}</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<sc-for list="{{ grp.items }}" as="c" hint-placeholder-count="2">
+<div sc-camel-on-click="{{ c.onOpen }}" style="{{ c.cardStyle }}" style-hover="background:var(--bg-hover);border-color:var(--border-strong)">
+<div style="{{ c.barStyle }}"></div>
+<div style="flex:1;min-width:0;padding:9px 12px 9px 14px;display:flex;flex-direction:column;gap:3px">
+<div style="display:flex;align-items:center;gap:8px">
+<span style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500">{{ c.name }}</span>
+<span style="{{ c.envStyle }}">{{ c.env }}</span>
+<sc-if value="{{ c.readOnly }}" hint-placeholder-val="{{ false }}"><span style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;color:var(--text-secondary);border:1px solid var(--border-strong);padding:0 4px;white-space:nowrap;flex:none">READ-ONLY</span></sc-if>
+<span style="{{ c.dotStyle }}">{{ c.dot }}</span>
+</div>
+<div style="display:flex;align-items:center;gap:10px">
+<span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-secondary);white-space:nowrap">{{ c.dsn }}</span>
+<span style="font-size:11px;color:var(--text-muted);white-space:nowrap">{{ c.opened }}</span>
+</div>
+</div>
+<div style="display:flex;align-items:center;gap:6px;padding-right:10px">
+<sc-if value="{{ c.connecting }}" hint-placeholder-val="{{ false }}">
+<span style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;color:var(--state-running);animation:combpulse 1.6s ease-in-out infinite">CONNECTING…</span>
+</sc-if>
+<button sc-camel-on-click="{{ c.onEdit }}" style="width:24px;height:24px;border-radius:3px;color:var(--text-muted);font-size:14px" style-hover="background:var(--bg-selected);color:var(--text-primary)">⋯</button>
+</div>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-for>
+<sc-if value="{{ noConnMatches }}" hint-placeholder-val="{{ false }}">
+<div style="text-align:center;padding:48px 0">
+<div style="font-size:24px;line-height:30px;font-weight:600;margin-bottom:6px">No connections match.</div>
+<div style="font-size:14px;line-height:20px;color:var(--text-secondary)">Try a different name, host, or environment.</div>
+</div>
+</sc-if>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isWorkspace }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;min-height:0;display:flex;flex-direction:column">
+
+<div style="{{ chromeStyle }}">
+<div style="{{ chromeEdgeStyle }}"></div>
+<div style="display:flex;align-items:center;gap:10px;min-width:0">
+<div style="{{ chromeBarStyle }}"></div>
+<button sc-camel-on-click="{{ openSwitcher }}" style="display:flex;align-items:center;gap:8px;padding:3px 6px;border-radius:3px" style-hover="background:var(--bg-hover)">
+<span style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500">{{ conn.name }}</span>
+<span style="{{ conn.envStyle }}">{{ conn.env }}</span>
+<sc-if value="{{ conn.readOnly }}" hint-placeholder-val="{{ false }}"><span style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;color:var(--text-secondary);border:1px solid var(--border-strong);padding:0 4px;white-space:nowrap;flex:none">READ-ONLY</span></sc-if>
+<span style="color:var(--text-muted);font-size:9px">▾</span>
+</button>
+</div>
+<button sc-camel-on-click="{{ openPalette }}" style="display:flex;align-items:center;gap:8px;height:24px;padding:0 10px;border:1px solid var(--border-subtle);border-radius:3px;background:var(--bg-base);color:var(--text-muted);font-size:12px;min-width:220px;justify-content:center" style-hover="border-color:var(--border-strong);color:var(--text-secondary)">
+<span>Search or run a command</span><span style="font-family:'IBM Plex Mono',monospace;font-size:11px">⌘K</span>
+</button>
+<div style="display:flex;align-items:center;gap:4px;justify-content:flex-end">
+<button sc-camel-on-click="{{ toggleTheme }}" title="Theme" style="width:26px;height:26px;border-radius:3px;color:var(--text-secondary);display:grid;place-items:center;font-size:13px" style-hover="background:var(--bg-hover);color:var(--text-primary)">◐</button>
+<button sc-camel-on-click="{{ toggleNotif }}" title="Notifications" style="{{ notifBtnStyle }}">
+<span style="font-size:13px">◔</span>
+<sc-if value="{{ hasNotifs }}" hint-placeholder-val="{{ true }}"><span style="{{ notifBadgeStyle }}">{{ notifCount }}</span></sc-if>
+</button>
+<button sc-camel-on-click="{{ openShortcuts }}" title="Keyboard shortcuts ⌘/" style="width:26px;height:26px;border-radius:3px;color:var(--text-secondary);display:grid;place-items:center;font-size:13px" style-hover="background:var(--bg-hover);color:var(--text-primary)">⌘</button>
+<button sc-camel-on-click="{{ openSettings }}" title="Settings ⌘," style="width:26px;height:26px;border-radius:3px;color:var(--text-secondary);display:grid;place-items:center;font-size:13px" style-hover="background:var(--bg-hover);color:var(--text-primary)">⚙</button>
+<button sc-camel-on-click="{{ toggleAI }}" style="{{ aiBtnStyle }}">AI</button>
+</div>
+</div>
+
+<div style="flex:1;min-height:0;display:flex">
+
+<sc-if value="{{ sidebarOpen }}" hint-placeholder-val="{{ true }}">
+<div style="width:248px;flex:none;background:var(--bg-raised);border-right:1px solid var(--border-subtle);display:flex;flex-direction:column;min-height:0">
+<div style="height:30px;flex:none;display:flex;align-items:stretch;border-bottom:1px solid var(--border-subtle)">
+<sc-for list="{{ sideSections }}" as="s" hint-placeholder-count="3">
+<button sc-camel-on-click="{{ s.onClick }}" style="{{ s.style }}">{{ s.label }}</button>
+</sc-for>
+</div>
+<div style="padding:8px;flex:none">
+<div style="display:flex;align-items:center;gap:6px;height:26px;padding:0 8px;background:var(--bg-base);border:1px solid var(--border-subtle);border-radius:3px">
+<input value="{{ treeFilter }}" sc-camel-on-change="{{ onTreeFilter }}" placeholder="{{ sidePlaceholder }}" style="flex:1;font-size:12px">
+<span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted)">⌘⇧O</span>
+</div>
+</div>
+<div style="flex:1;min-height:0;overflow:auto;padding-bottom:8px">
+<sc-for list="{{ sideRows }}" as="r" hint-placeholder-count="12">
+<div sc-camel-on-click="{{ r.onClick }}" sc-camel-on-context-menu="{{ r.onCtx }}" style="{{ r.style }}" style-hover="background:var(--bg-hover)">
+<span style="{{ r.iconStyle }}">{{ r.icon }}</span>
+<span style="{{ r.labelStyle }}">{{ r.label }}</span>
+<span style="flex:1"></span>
+<span style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:500;letter-spacing:0.06em;color:var(--text-muted)">{{ r.meta }}</span>
+</div>
+</sc-for>
+<sc-if value="{{ sideEmpty }}" hint-placeholder-val="{{ false }}">
+<div style="padding:24px 16px;text-align:center;color:var(--text-muted);font-size:12px">No matches for “{{ treeFilter }}”.</div>
+</sc-if>
+</div>
+<button sc-camel-on-click="{{ toggleSidebar }}" style="height:24px;flex:none;border-top:1px solid var(--border-subtle);color:var(--text-muted);font-size:11px;text-align:left;padding:0 10px" style-hover="color:var(--text-primary)">⌘B  collapse</button>
+</div>
+</sc-if>
+
+<div style="flex:1;min-width:0;display:flex;flex-direction:column">
+<div style="height:32px;flex:none;display:flex;align-items:stretch;background:var(--bg-inset);border-bottom:1px solid var(--border-subtle);overflow:hidden">
+<div style="display:flex;align-items:stretch;overflow-x:auto">
+<sc-for list="{{ tabs }}" as="t" hint-placeholder-count="3">
+<div sc-camel-on-click="{{ t.onClick }}" style="{{ t.style }}" style-hover="background:var(--bg-hover)">
+<span style="{{ t.iconStyle }}">{{ t.icon }}</span>
+<span style="{{ t.titleStyle }}">{{ t.title }}</span>
+<sc-if value="{{ t.dirty }}" hint-placeholder-val="{{ false }}"><span style="width:6px;height:6px;border-radius:50%;background:var(--text-secondary)"></span></sc-if>
+<button sc-camel-on-click="{{ t.onClose }}" style="width:16px;height:16px;border-radius:2px;color:var(--text-muted);font-size:11px;display:grid;place-items:center" style-hover="background:var(--bg-selected);color:var(--text-primary)">✕</button>
+</div>
+</sc-for>
+</div>
+<button sc-camel-on-click="{{ newQueryTab }}" title="New query tab ⌘T" style="width:32px;flex:none;color:var(--text-muted);font-size:14px;border-right:1px solid var(--border-subtle)" style-hover="background:var(--bg-hover);color:var(--text-primary)">+</button>
+</div>
+
+<div style="flex:1;min-height:0;display:flex;flex-direction:column;background:var(--bg-base)">
+
+<sc-if value="{{ isTableTab }}" hint-placeholder-val="{{ true }}">
+<div style="height:30px;flex:none;display:flex;align-items:stretch;border-bottom:1px solid var(--border-subtle);background:var(--bg-raised)">
+<sc-for list="{{ subTabs }}" as="s" hint-placeholder-count="5">
+<button sc-camel-on-click="{{ s.onClick }}" style="{{ s.style }}">{{ s.label }}</button>
+</sc-for>
+</div>
+
+<sc-if value="{{ isData }}" hint-placeholder-val="{{ true }}">
+<div style="height:34px;flex:none;display:flex;align-items:center;gap:6px;padding:0 8px;border-bottom:1px solid var(--border-subtle)">
+<button sc-camel-on-click="{{ addRow }}" style="{{ writeBtnStyle }}">+ Add row</button>
+<button sc-camel-on-click="{{ delRow }}" style="{{ writeBtnStyle }}">⌫ Delete</button>
+<button sc-camel-on-click="{{ reload }}" style="height:22px;padding:0 8px;border-radius:3px;font-size:12px;color:var(--text-secondary)" style-hover="background:var(--bg-hover);color:var(--text-primary)">⟳</button>
+<div style="width:1px;height:16px;background:var(--border-subtle);margin:0 2px"></div>
+<div style="display:flex;align-items:center;gap:6px;height:22px;padding:0 8px;background:var(--bg-raised);border:1px solid var(--border-subtle);border-radius:3px;width:200px">
+<input value="{{ gridFilter }}" sc-camel-on-change="{{ onGridFilter }}" placeholder="filter…" style="flex:1;font-family:'IBM Plex Mono',monospace;font-size:12px">
+</div>
+<span style="flex:1;min-width:8px"></span>
+<sc-if value="{{ conn.readOnly }}" hint-placeholder-val="{{ false }}">
+<button sc-camel-on-click="{{ explainReadOnly }}" style="display:flex;align-items:center;gap:6px;height:22px;padding:0 8px;border:1px solid var(--border-strong);border-radius:3px;font-size:12px;color:var(--text-secondary);white-space:nowrap;flex:none" style-hover="color:var(--text-primary)">🔒 Read-only</button>
+</sc-if>
+<sc-if value="{{ hasPending }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;align-items:center;gap:8px">
+<span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--state-running)">⚠ {{ pendingCount }} pending changes</span>
+<button sc-camel-on-click="{{ openReview }}" style="height:22px;padding:0 10px;border-radius:3px;background:var(--btn-primary);color:var(--text-inverse);font-size:12px;font-weight:500">Review</button>
+<button sc-camel-on-click="{{ discardAll }}" style="height:22px;padding:0 8px;border:1px solid var(--border-subtle);border-radius:3px;font-size:12px;color:var(--text-secondary)" style-hover="color:var(--text-primary)">Discard</button>
+</div>
+</sc-if>
+</div>
+
+<div style="flex:1;min-height:0;display:flex">
+<div style="flex:1;min-width:0;display:flex;flex-direction:column">
+<div style="flex:1;min-height:0;overflow:auto;position:relative">
+<div style="{{ headStyle }}">
+<div style="border-right:1px solid var(--border-subtle);background:var(--bg-inset)"></div>
+<sc-for list="{{ cols }}" as="c" hint-placeholder-count="8">
+<div sc-camel-on-click="{{ c.onSort }}" style="{{ c.headStyle }}" style-hover="background:var(--bg-hover)">
+<div style="{{ c.tickStyle }}"></div>
+<div style="padding:4px 8px 4px 10px;display:flex;flex-direction:column;gap:1px;min-width:0">
+<div style="display:flex;align-items:center;gap:4px;min-width:0">
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.key }}</span>
+<span style="{{ c.markStyle }}">{{ c.mark }}</span>
+<span style="font-size:10px;color:var(--text-secondary)">{{ c.sortMark }}</span>
+</div>
+<span style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">{{ c.type }}</span>
+</div>
+</div>
+</sc-for>
+</div>
+<sc-if value="{{ gridLoading }}" hint-placeholder-val="{{ false }}">
+<sc-for list="{{ skeletons }}" as="s" hint-placeholder-count="10">
+<div style="{{ s.rowStyle }}">
+<div style="border-right:1px solid var(--border-subtle);background:var(--bg-inset)"></div>
+<sc-for list="{{ cols }}" as="c" hint-placeholder-count="8">
+<div style="display:flex;align-items:center;padding:0 10px;border-right:1px solid var(--border-subtle)">
+<div style="{{ s.barStyle }}"></div>
+</div>
+</sc-for>
+</div>
+</sc-for>
+</sc-if>
+<sc-for list="{{ rows }}" as="r" hint-placeholder-count="14">
+<div style="{{ r.rowStyle }}" style-hover="background:var(--bg-hover)">
+<div style="{{ r.gutterStyle }}">{{ r.n }}</div>
+<sc-for list="{{ r.cells }}" as="cell" hint-placeholder-count="8">
+<div sc-camel-on-click="{{ cell.onClick }}" sc-camel-on-double-click="{{ cell.onEdit }}" style="{{ cell.style }}">
+<sc-if value="{{ cell.editing }}" hint-placeholder-val="{{ false }}">
+<input value="{{ editValue }}" sc-camel-on-change="{{ onEditChange }}" sc-camel-on-key-down="{{ onEditKey }}" sc-camel-on-blur="{{ commitEdit }}" sc-camel-auto-focus="{{ true }}" style="width:100%;font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--text-primary);background:var(--bg-inset)">
+</sc-if>
+<sc-if value="{{ cell.showValue }}" hint-placeholder-val="{{ true }}">
+<span style="{{ cell.valueStyle }}">{{ cell.display }}</span>
+</sc-if>
+<sc-if value="{{ cell.dirty }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;top:0;right:0;width:0;height:0;border-left:5px solid transparent;border-top:5px solid var(--state-running)"></div>
+</sc-if>
+</div>
+</sc-for>
+</div>
+</sc-for>
+<sc-if value="{{ gridEmpty }}" hint-placeholder-val="{{ false }}">
+<div style="padding:56px 20px;text-align:center">
+<div style="font-size:24px;line-height:30px;font-weight:600;margin-bottom:6px">No rows match that filter.</div>
+<div style="font-size:14px;line-height:20px;color:var(--text-secondary);margin-bottom:14px">The filter <span style="font-family:'IBM Plex Mono',monospace">{{ gridFilter }}</span> returned nothing from ~48,201 rows.</div>
+<button sc-camel-on-click="{{ clearFilter }}" style="height:26px;padding:0 12px;border:1px solid var(--border-strong);border-radius:3px;font-size:13px">Clear filter</button>
+</div>
+</sc-if>
+</div>
+<div style="height:28px;flex:none;display:flex;align-items:center;gap:12px;padding:0 10px;border-top:1px solid var(--border-subtle);background:var(--bg-raised)">
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-secondary)">{{ pageLabel }}</span>
+<div style="display:flex;gap:2px">
+<button style="width:20px;height:20px;border-radius:2px;color:var(--text-muted);font-size:12px" style-hover="background:var(--bg-hover);color:var(--text-primary)">‹</button>
+<button style="width:20px;height:20px;border-radius:2px;color:var(--text-secondary);font-size:12px" style-hover="background:var(--bg-hover);color:var(--text-primary)">›</button>
+</div>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted);border:1px solid var(--border-subtle);border-radius:3px;padding:0 6px">100 ▾</span>
+<span style="flex:1"></span>
+<button sc-camel-on-click="{{ toggleInspector }}" style="font-size:12px;color:var(--text-secondary);display:flex;align-items:center;gap:6px" style-hover="color:var(--text-primary)">⇱ inspector <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted)">Space</span></button>
+</div>
+</div>
+
+<sc-if value="{{ inspectorOpen }}" hint-placeholder-val="{{ false }}">
+<div style="width:320px;flex:none;background:var(--bg-raised);border-left:1px solid var(--border-subtle);display:flex;flex-direction:column">
+<div style="height:30px;flex:none;display:flex;align-items:center;gap:8px;padding:0 10px;border-bottom:1px solid var(--border-subtle)">
+<span style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Value inspector</span>
+<span style="flex:1"></span>
+<button sc-camel-on-click="{{ closeInspector }}" style="color:var(--text-muted);font-size:12px" style-hover="color:var(--text-primary)">✕</button>
+</div>
+<div style="padding:10px;border-bottom:1px solid var(--border-subtle);display:flex;flex-direction:column;gap:4px">
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px">{{ inspector.col }}</span>
+<div style="display:flex;align-items:center;gap:8px">
+<span style="{{ inspector.badgeStyle }}">{{ inspector.type }}</span>
+<span style="font-size:11px;color:var(--text-muted)">row {{ inspector.row }} · {{ inspector.size }}</span>
+</div>
+</div>
+<div style="flex:1;min-height:0;overflow:auto;padding:10px">
+<pre style="margin:0;font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:18px;color:var(--text-primary);white-space:pre-wrap">{{ inspector.body }}</pre>
+</div>
+<div style="height:30px;flex:none;display:flex;align-items:center;gap:8px;padding:0 10px;border-top:1px solid var(--border-subtle)">
+<button style="font-size:12px;color:var(--text-secondary)" style-hover="color:var(--text-primary)">Copy</button>
+<button style="font-size:12px;color:var(--text-secondary)" style-hover="color:var(--text-primary)">Tree</button>
+<button style="font-size:12px;color:var(--text-secondary)" style-hover="color:var(--text-primary)">Raw</button>
+</div>
+</div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ isStructure }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;min-height:0;overflow:auto;padding:14px">
+<sc-if value="{{ rlsOn }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--border-strong);border-left:3px solid var(--state-info);border-radius:3px;margin-bottom:14px;font-size:13px;color:var(--text-secondary)">
+<span style="color:var(--state-info)">◆</span> Row-level security is <span style="font-family:'IBM Plex Mono',monospace;color:var(--text-primary)">ENABLED</span> on this table — 2 policies apply, so what you see may be a subset.
+</div>
+</sc-if>
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px">Columns</div>
+<div style="border:1px solid var(--border-subtle);border-radius:3px;overflow:hidden;margin-bottom:20px">
+<div style="{{ structHeadStyle }}">
+<div style="padding:5px 10px">Name</div><div style="padding:5px 10px">Type</div><div style="padding:5px 10px">Nullable</div><div style="padding:5px 10px">Default</div><div style="padding:5px 10px">Comment</div>
+</div>
+<sc-for list="{{ structRows }}" as="s" hint-placeholder-count="8">
+<div style="{{ s.style }}" style-hover="background:var(--bg-hover)">
+<div style="padding:6px 10px;display:flex;align-items:center;gap:6px;font-family:'IBM Plex Mono',monospace;font-size:13px">{{ s.name }}<span style="{{ s.markStyle }}">{{ s.mark }}</span></div>
+<div style="padding:6px 10px;display:flex;align-items:center;gap:6px"><span style="{{ s.tickStyle }}"></span><span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--text-secondary)">{{ s.type }}</span></div>
+<div style="padding:6px 10px;font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--text-secondary)">{{ s.nullable }}</div>
+<div style="padding:6px 10px;font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--text-secondary)">{{ s.def }}</div>
+<div style="padding:6px 10px;font-size:13px;color:var(--text-muted)">{{ s.comment }}</div>
+</div>
+</sc-for>
+</div>
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px">Constraints &amp; indexes</div>
+<div style="display:flex;flex-direction:column;gap:6px">
+<sc-for list="{{ constraintRows }}" as="k" hint-placeholder-count="4">
+<div style="display:flex;align-items:center;gap:10px;padding:7px 10px;border:1px solid var(--border-subtle);border-radius:3px">
+<span style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;color:var(--text-muted);width:74px">{{ k.kind }}</span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:13px">{{ k.name }}</span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-secondary)">{{ k.def }}</span>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isDDL }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;min-height:0;display:flex;flex-direction:column">
+<div style="height:30px;flex:none;display:flex;align-items:center;gap:8px;padding:0 10px;border-bottom:1px solid var(--border-subtle)">
+<button style="height:22px;padding:0 8px;border:1px solid var(--border-strong);border-radius:3px;font-size:12px">Copy DDL</button>
+<span style="font-size:12px;color:var(--text-muted)">Reconstructed from the catalog · read-only in v1</span>
+</div>
+<div style="flex:1;min-height:0;overflow:auto;background:var(--bg-inset);padding:12px 0">
+<sc-for list="{{ ddlLines }}" as="l" hint-placeholder-count="12">
+<div style="display:flex;gap:14px;padding:0 14px">
+<span style="font-family:'IBM Plex Mono',monospace;font-size:13px;line-height:20px;color:var(--text-muted);width:22px;text-align:right;user-select:none">{{ l.n }}</span>
+<span style="{{ l.style }}">{{ l.text }}</span>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isOtherSub }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;display:grid;place-items:center;padding:40px">
+<div style="text-align:center;max-width:340px">
+<div style="font-size:24px;line-height:30px;font-weight:600;margin-bottom:6px">{{ subTitle }}</div>
+<div style="font-size:14px;line-height:20px;color:var(--text-secondary)">Catalog panel for {{ subTitle }} — same table shape as Structure. Not mocked in this pass.</div>
+</div>
+</div>
+</sc-if>
+</sc-if>
+
+<sc-if value="{{ isQueryTab }}" hint-placeholder-val="{{ false }}">
+<div style="height:32px;flex:none;display:flex;align-items:center;gap:6px;padding:0 8px;border-bottom:1px solid var(--border-subtle);background:var(--bg-raised)">
+<sc-if value="{{ notRunning }}" hint-placeholder-val="{{ true }}">
+<button sc-camel-on-click="{{ runQuery }}" style="display:flex;align-items:center;gap:6px;height:22px;padding:0 10px;border-radius:3px;background:var(--btn-primary);color:var(--text-inverse);font-size:12px;font-weight:500;white-space:nowrap;flex:none">▷ Run <span style="font-family:'IBM Plex Mono',monospace;opacity:.6">⌘↵</span></button>
+</sc-if>
+<sc-if value="{{ running }}" hint-placeholder-val="{{ false }}">
+<button sc-camel-on-click="{{ cancelQuery }}" style="display:flex;align-items:center;gap:6px;height:22px;padding:0 10px;border-radius:3px;border:1px solid var(--danger);color:var(--danger);font-size:12px;font-weight:500;white-space:nowrap;flex:none">▢ Stop <span style="font-family:'IBM Plex Mono',monospace;opacity:.7">⌘.</span></button>
+</sc-if>
+<button style="height:22px;padding:0 8px;border-radius:3px;font-size:12px;color:var(--text-secondary);white-space:nowrap;flex:none" style-hover="background:var(--bg-hover);color:var(--text-primary)">⌥ Format</button>
+<button style="height:22px;padding:0 8px;border-radius:3px;font-size:12px;color:var(--text-secondary);white-space:nowrap;flex:none" style-hover="background:var(--bg-hover);color:var(--text-primary)">⤓ Save</button>
+<div style="width:1px;height:16px;background:var(--border-subtle);margin:0 2px"></div>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-secondary)">public ▾</span>
+<span style="flex:1"></span>
+<button style="height:22px;padding:0 8px;border-radius:3px;font-size:12px;color:var(--text-secondary);white-space:nowrap;flex:none" style-hover="background:var(--bg-hover);color:var(--text-primary)">⚡ Explain</button>
+</div>
+<div style="flex:1;min-height:0;display:flex;flex-direction:column">
+<div style="height:46%;flex:none;min-height:120px;display:flex;background:var(--bg-inset);overflow:auto;position:relative">
+<div style="flex:none;padding:10px 0;user-select:none;background:var(--bg-inset)">
+<sc-for list="{{ sqlLines }}" as="l" hint-placeholder-count="6">
+<div style="{{ l.gutterStyle }}">{{ l.n }}</div>
+</sc-for>
+</div>
+<textarea value="{{ sql }}" sc-camel-on-change="{{ onSqlChange }}" sc-camel-spell-check="{{ false }}" wrap="off" style="flex:1;padding:10px 14px;font-family:'IBM Plex Mono',monospace;font-size:13px;line-height:20px;color:var(--text-primary);background:transparent;resize:none;border:none;tab-size:2"></textarea>
+<sc-if value="{{ hasErrorMark }}" hint-placeholder-val="{{ false }}">
+<div style="{{ errorMarkStyle }}"></div>
+</sc-if>
+</div>
+<div style="height:5px;flex:none;background:var(--bg-raised);border-top:1px solid var(--border-subtle);border-bottom:1px solid var(--border-subtle);cursor:row-resize"></div>
+<div style="flex:1;min-height:0;display:flex;flex-direction:column">
+<div style="height:28px;flex:none;display:flex;align-items:stretch;gap:0;border-bottom:1px solid var(--border-subtle);background:var(--bg-raised)">
+<sc-for list="{{ resultTabs }}" as="s" hint-placeholder-count="3">
+<button sc-camel-on-click="{{ s.onClick }}" style="{{ s.style }}">{{ s.label }}<sc-if value="{{ s.badge }}" hint-placeholder-val="{{ false }}"><span style="margin-left:6px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted)">{{ s.badgeText }}</span></sc-if></button>
+</sc-for>
+<span style="flex:1"></span>
+<div style="display:flex;align-items:center;padding:0 10px;gap:8px">
+<span style="{{ resultMetaStyle }}">{{ resultMeta }}</span>
+</div>
+</div>
+<div style="flex:1;min-height:0;overflow:auto;position:relative">
+<sc-if value="{{ qError }}" hint-placeholder-val="{{ false }}">
+<div style="padding:16px;display:flex;flex-direction:column;gap:12px;max-width:760px">
+<div style="display:flex;align-items:center;gap:8px">
+<span style="color:var(--state-error);font-size:14px">✕</span>
+<span style="font-size:14px;line-height:20px;font-weight:500;color:var(--state-error)">Query failed</span>
+</div>
+<div style="border:1px solid var(--border-strong);border-left:3px solid var(--state-error);border-radius:3px;padding:10px 12px;background:var(--bg-raised)">
+<pre style="margin:0;font-family:'IBM Plex Mono',monospace;font-size:13px;line-height:20px;white-space:pre-wrap;color:var(--text-primary)">{{ qErrMsg }}</pre>
+<div style="display:flex;gap:16px;margin-top:8px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-muted)">
+<span>SQLSTATE {{ qErrCode }}</span><span>position {{ qErrPos }}</span><span>line {{ qErrLine }}</span>
+</div>
+</div>
+<div style="display:flex;gap:8px">
+<button sc-camel-on-click="{{ fixWithAI }}" style="height:26px;padding:0 12px;border-radius:3px;background:var(--btn-primary);color:var(--text-inverse);font-size:13px;font-weight:500">Fix with AI</button>
+<button sc-camel-on-click="{{ runQuery }}" style="height:26px;padding:0 12px;border:1px solid var(--border-strong);border-radius:3px;font-size:13px">Run again</button>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ qMessages }}" hint-placeholder-val="{{ false }}">
+<div style="padding:12px 14px;display:flex;flex-direction:column;gap:6px">
+<sc-for list="{{ noticeLines }}" as="n" hint-placeholder-count="3">
+<div style="display:flex;gap:10px;font-family:'IBM Plex Mono',monospace;font-size:13px;line-height:20px">
+<span style="{{ n.tagStyle }}">{{ n.tag }}</span><span style="color:var(--text-secondary)">{{ n.text }}</span>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ qHasRows }}" hint-placeholder-val="{{ true }}">
+<div style="{{ qHeadStyle }}">
+<div style="border-right:1px solid var(--border-subtle);background:var(--bg-inset)"></div>
+<sc-for list="{{ qCols }}" as="c" hint-placeholder-count="3">
+<div style="{{ c.headStyle }}">
+<div style="{{ c.tickStyle }}"></div>
+<div style="padding:4px 8px 4px 10px;display:flex;flex-direction:column;gap:1px">
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:500">{{ c.key }}</span>
+<span style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">{{ c.type }}</span>
+</div>
+</div>
+</sc-for>
+</div>
+<sc-for list="{{ qRows }}" as="r" hint-placeholder-count="10">
+<div style="{{ r.rowStyle }}" style-hover="background:var(--bg-hover)">
+<div style="{{ r.gutterStyle }}">{{ r.n }}</div>
+<sc-for list="{{ r.cells }}" as="cell" hint-placeholder-count="3">
+<div style="{{ cell.style }}"><span style="{{ cell.valueStyle }}">{{ cell.display }}</span></div>
+</sc-for>
+</div>
+</sc-for>
+<div style="padding:8px 12px;font-size:12px;color:var(--text-muted);font-family:'IBM Plex Mono',monospace">— no primary key on this result: grid is read-only</div>
+</sc-if>
+<sc-if value="{{ qIdle }}" hint-placeholder-val="{{ false }}">
+<div style="height:100%;display:grid;place-items:center;padding:30px">
+<div style="text-align:center;max-width:320px">
+<div style="font-size:24px;line-height:30px;font-weight:600;margin-bottom:6px">Nothing run yet.</div>
+<div style="font-size:14px;line-height:20px;color:var(--text-secondary)">Press <span style="font-family:'IBM Plex Mono',monospace">⌘↵</span> to run the statement under the cursor.</div>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ running }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;background:var(--bg-base);opacity:.55"></div>
+</sc-if>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isErdTab }}" hint-placeholder-val="{{ false }}">
+<div style="height:32px;flex:none;display:flex;align-items:center;gap:10px;padding:0 10px;border-bottom:1px solid var(--border-subtle);background:var(--bg-raised);font-size:12px;flex-wrap:nowrap;overflow-x:auto">
+<span style="color:var(--text-secondary);white-space:nowrap;flex:none">Schema: <span style="font-family:'IBM Plex Mono',monospace;color:var(--text-primary)">public ▾</span></span>
+<div style="display:flex;align-items:stretch;border:1px solid var(--border-subtle);border-radius:3px;overflow:hidden;height:22px;flex:none">
+<sc-for list="{{ detailSegs }}" as="s" hint-placeholder-count="3">
+<button sc-camel-on-click="{{ s.onClick }}" style="{{ s.style }}">{{ s.label }}</button>
+</sc-for>
+</div>
+<button sc-camel-on-click="{{ relayout }}" style="height:22px;padding:0 8px;border-radius:3px;color:var(--text-secondary);white-space:nowrap;flex:none" style-hover="background:var(--bg-hover);color:var(--text-primary)">⟳ Re-layout</button>
+<span style="color:var(--text-secondary);white-space:nowrap;flex:none">Focus: <span style="font-family:'IBM Plex Mono',monospace;color:var(--text-primary)">{{ focusLabel }}</span></span>
+<span style="flex:1;min-width:8px"></span>
+<span style="display:flex;align-items:center;gap:6px;color:var(--text-muted);white-space:nowrap;flex:none"><span style="width:18px;height:0;border-top:1px dashed var(--text-muted)"></span> inferred</span>
+<button style="height:22px;padding:0 8px;border-radius:3px;color:var(--text-secondary);white-space:nowrap;flex:none" style-hover="background:var(--bg-hover);color:var(--text-primary)">⤓ Export</button>
+</div>
+<div style="flex:1;min-height:0;position:relative;overflow:auto;background:var(--bg-inset)">
+<div style="position:absolute;inset:0;background-image:radial-gradient(var(--border-subtle) 1px,transparent 1px);background-size:22px 22px;opacity:.7"></div>
+<svg sc-camel-view-box="0 0 980 560" style="position:absolute;left:0;top:0;width:980px;height:560px">
+<sc-for list="{{ edges }}" as="e" hint-placeholder-count="4">
+<path d="{{ e.d }}" fill="none" stroke="{{ e.stroke }}" stroke-width="{{ e.width }}" stroke-dasharray="{{ e.dash }}"></path>
+</sc-for>
+<sc-for list="{{ edgeLabels }}" as="l" hint-placeholder-count="4">
+<text x="{{ l.x }}" y="{{ l.y }}" fill="{{ l.fill }}" font-size="11" font-family="IBM Plex Mono, monospace">{{ l.text }}</text>
+</sc-for>
+</svg>
+<sc-for list="{{ erdNodes }}" as="n" hint-placeholder-count="5">
+<div sc-camel-on-click="{{ n.onClick }}" style="{{ n.style }}">
+<div style="{{ n.headStyle }}">
+<span style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500">{{ n.name }}</span>
+<span style="flex:1"></span>
+<span style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:500;letter-spacing:0.06em;color:var(--text-muted)">{{ n.est }}</span>
+</div>
+<sc-for list="{{ n.cols }}" as="c" hint-placeholder-count="3">
+<div style="display:flex;align-items:center;gap:6px;padding:3px 8px;border-top:1px solid var(--border-subtle)">
+<span style="{{ c.markStyle }}">{{ c.mark }}</span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-primary)">{{ c.name }}</span>
+<span style="flex:1"></span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted)">{{ c.type }}</span>
+</div>
+</sc-for>
+</div>
+</sc-for>
+<div style="position:absolute;right:12px;bottom:12px;display:flex;align-items:center;gap:6px">
+<div style="display:flex;border:1px solid var(--border-strong);border-radius:3px;overflow:hidden;background:var(--bg-raised)">
+<button style="width:24px;height:24px;color:var(--text-secondary)" style-hover="background:var(--bg-hover);color:var(--text-primary)">−</button>
+<button style="width:24px;height:24px;color:var(--text-secondary);border-left:1px solid var(--border-subtle)" style-hover="background:var(--bg-hover);color:var(--text-primary)">⊡</button>
+<button style="width:24px;height:24px;color:var(--text-secondary);border-left:1px solid var(--border-subtle)" style-hover="background:var(--bg-hover);color:var(--text-primary)">+</button>
+</div>
+<div style="width:96px;height:60px;border:1px solid var(--border-strong);background:var(--bg-raised);position:relative">
+<div style="position:absolute;left:8px;top:10px;width:20px;height:8px;background:var(--border-strong)"></div>
+<div style="position:absolute;left:44px;top:8px;width:24px;height:10px;background:var(--border-strong)"></div>
+<div style="position:absolute;left:46px;top:34px;width:22px;height:8px;background:var(--border-strong)"></div>
+<div style="position:absolute;left:6px;top:36px;width:18px;height:7px;background:var(--border-strong)"></div>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isSettingsTab }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;min-height:0;overflow:auto">
+<div style="max-width:720px;padding:24px 28px 60px;display:flex;flex-direction:column;gap:26px">
+<div style="font-size:20px;line-height:26px;font-weight:600">Settings</div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Appearance</div>
+<div style="display:flex;align-items:center;justify-content:space-between;gap:20px">
+<div><div style="font-size:13px;line-height:18px">Theme</div><div style="font-size:12px;color:var(--text-muted)">Dark is the default.</div></div>
+<div style="display:flex;border:1px solid var(--border-subtle);border-radius:3px;overflow:hidden;height:24px">
+<sc-for list="{{ themeSegs }}" as="s" hint-placeholder-count="2"><button sc-camel-on-click="{{ s.onClick }}" style="{{ s.style }}">{{ s.label }}</button></sc-for>
+</div>
+</div>
+<div style="display:flex;align-items:center;justify-content:space-between;gap:20px">
+<div><div style="font-size:13px;line-height:18px">Density</div><div style="font-size:12px;color:var(--text-muted)">Row height in every grid.</div></div>
+<div style="display:flex;border:1px solid var(--border-subtle);border-radius:3px;overflow:hidden;height:24px">
+<sc-for list="{{ densitySegs }}" as="s" hint-placeholder-count="2"><button sc-camel-on-click="{{ s.onClick }}" style="{{ s.style }}">{{ s.label }}</button></sc-for>
+</div>
+</div>
+</div>
+<div style="height:1px;background:var(--border-subtle)"></div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">AI</div>
+<div style="display:flex;flex-direction:column;gap:6px">
+<div style="font-size:13px;line-height:18px">API key</div>
+<div style="display:flex;align-items:center;gap:8px;height:28px;padding:0 10px;background:var(--bg-raised);border:1px solid var(--border-strong);border-radius:3px;max-width:420px">
+<input value="{{ apiKey }}" sc-camel-on-change="{{ onApiKey }}" placeholder="sk-ant-…" style="flex:1;font-family:'IBM Plex Mono',monospace;font-size:13px"><span style="font-size:11px;color:var(--text-muted)">stored server-side</span>
+</div>
+</div>
+<button sc-camel-on-click="{{ openAiConfig }}" style="align-self:flex-start;height:24px;padding:0 10px;border:1px solid var(--border-strong);border-radius:3px;font-size:12px" style-hover="background:var(--bg-hover)">Open full AI configuration →</button>
+<div style="display:flex;align-items:center;justify-content:space-between;gap:20px">
+<div><div style="font-size:13px;line-height:18px">Default context mode</div><div style="font-size:12px;color:var(--text-muted)">What the panel sends unless you change it.</div></div>
+<div style="display:flex;border:1px solid var(--border-subtle);border-radius:3px;overflow:hidden;height:24px">
+<sc-for list="{{ ctxSegs }}" as="s" hint-placeholder-count="3"><button sc-camel-on-click="{{ s.onClick }}" style="{{ s.style }}">{{ s.label }}</button></sc-for>
+</div>
+</div>
+</div>
+<div style="height:1px;background:var(--border-subtle)"></div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Safety</div>
+<sc-for list="{{ safetyToggles }}" as="t" hint-placeholder-count="4">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:20px">
+<div style="font-size:13px;line-height:18px;color:var(--text-primary)">{{ t.label }}</div>
+<button sc-camel-on-click="{{ t.onClick }}" style="{{ t.trackStyle }}"><span style="{{ t.knobStyle }}"></span></button>
+</div>
+</sc-for>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isRolesTab }}" hint-placeholder-val="{{ false }}">
+<div style="height:34px;flex:none;display:flex;align-items:center;gap:8px;padding:0 10px;border-bottom:1px solid var(--border-subtle);background:var(--bg-raised);overflow-x:auto">
+<span style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);white-space:nowrap;flex:none">Roles &amp; privileges</span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-secondary);white-space:nowrap;flex:none">{{ roleCount }} roles · cluster db.internal</span>
+<span style="flex:1;min-width:8px"></span>
+<button sc-camel-on-click="{{ newRole }}" style="height:22px;padding:0 9px;border:1px solid var(--border-strong);border-radius:3px;font-size:12px;white-space:nowrap;flex:none" style-hover="background:var(--bg-hover)">+ New role</button>
+<sc-if value="{{ hasGrantChanges }}" hint-placeholder-val="{{ false }}">
+<span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--state-running);white-space:nowrap;flex:none">⚠ {{ grantCount }} pending</span>
+<button sc-camel-on-click="{{ toggleGrantReview }}" style="height:22px;padding:0 10px;border-radius:3px;background:var(--btn-primary);color:var(--text-inverse);font-size:12px;font-weight:500;white-space:nowrap;flex:none">Review</button>
+<button sc-camel-on-click="{{ discardGrants }}" style="height:22px;padding:0 8px;border:1px solid var(--border-subtle);border-radius:3px;font-size:12px;color:var(--text-secondary);white-space:nowrap;flex:none" style-hover="color:var(--text-primary)">Discard</button>
+</sc-if>
+</div>
+<div style="flex:1;min-height:0;display:flex">
+<div style="width:250px;flex:none;border-right:1px solid var(--border-subtle);display:flex;flex-direction:column;background:var(--bg-raised)">
+<div style="padding:8px;flex:none">
+<div style="display:flex;align-items:center;gap:6px;height:26px;padding:0 8px;background:var(--bg-base);border:1px solid var(--border-subtle);border-radius:3px">
+<input value="{{ roleFilter }}" sc-camel-on-change="{{ onRoleFilter }}" placeholder="filter roles" style="flex:1;font-family:'IBM Plex Mono',monospace;font-size:12px">
+</div>
+</div>
+<div style="flex:1;min-height:0;overflow:auto">
+<sc-for list="{{ roleList }}" as="r" hint-placeholder-count="6">
+<div sc-camel-on-click="{{ r.onClick }}" style="{{ r.style }}" style-hover="background:var(--bg-hover)">
+<div style="display:flex;align-items:center;gap:7px;min-width:0">
+<span style="{{ r.dotStyle }}"></span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.name }}</span>
+<span style="flex:1"></span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted);white-space:nowrap">{{ r.conns }}</span>
+</div>
+<div style="display:flex;gap:4px;flex-wrap:wrap">
+<sc-for list="{{ r.attrs }}" as="a" hint-placeholder-count="2">
+<span style="{{ a.style }}">{{ a.label }}</span>
+</sc-for>
+</div>
+</div>
+</sc-for>
+</div>
+</div>
+<div style="flex:1;min-width:0;overflow:auto">
+<div style="padding:16px 18px 40px;display:flex;flex-direction:column;gap:22px;max-width:860px">
+<div style="display:flex;align-items:center;gap:10px">
+<span style="font-family:'IBM Plex Mono',monospace;font-size:20px;line-height:26px;font-weight:500">{{ role.name }}</span>
+<sc-for list="{{ role.attrs }}" as="a" hint-placeholder-count="2"><span style="{{ a.style }}">{{ a.label }}</span></sc-for>
+<span style="flex:1"></span>
+<button sc-camel-on-click="{{ dropRole }}" style="height:24px;padding:0 9px;border:1px solid var(--border-strong);border-radius:3px;font-size:12px;color:var(--danger)" style-hover="background:color-mix(in oklab, var(--danger) 14%, transparent)">Drop role…</button>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+<div style="display:flex;flex-direction:column;gap:10px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Attributes</div>
+<sc-for list="{{ roleAttrToggles }}" as="t" hint-placeholder-count="5">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:14px">
+<div style="display:flex;flex-direction:column;gap:1px">
+<span style="font-family:'IBM Plex Mono',monospace;font-size:13px">{{ t.label }}</span>
+<span style="font-size:11px;color:var(--text-muted)">{{ t.hint }}</span>
+</div>
+<button sc-camel-on-click="{{ t.onClick }}" style="{{ t.trackStyle }}"><span style="{{ t.knobStyle }}"></span></button>
+</div>
+</sc-for>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Identity</div>
+<div style="display:flex;flex-direction:column;gap:4px">
+<span style="font-size:12px;color:var(--text-secondary)">Password</span>
+<div style="display:flex;gap:6px">
+<span style="flex:1;height:26px;display:flex;align-items:center;padding:0 9px;background:var(--bg-raised);border:1px solid var(--border-strong);border-radius:3px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-muted)">{{ role.pwd }}</span>
+<button sc-camel-on-click="{{ resetPwd }}" style="height:26px;padding:0 9px;border:1px solid var(--border-strong);border-radius:3px;font-size:12px">Reset…</button>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:4px">
+<span style="font-size:12px;color:var(--text-secondary)">Valid until</span>
+<span style="height:26px;display:flex;align-items:center;padding:0 9px;background:var(--bg-raised);border:1px solid var(--border-strong);border-radius:3px;font-family:'IBM Plex Mono',monospace;font-size:12px">{{ role.valid }}</span>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px">
+<span style="font-size:12px;color:var(--text-secondary)">Member of</span>
+<div style="display:flex;gap:6px;flex-wrap:wrap">
+<sc-for list="{{ role.memberOf }}" as="m" hint-placeholder-count="1">
+<span style="display:flex;align-items:center;gap:6px;height:22px;padding:0 8px;border:1px solid var(--border-subtle);border-radius:3px;font-family:'IBM Plex Mono',monospace;font-size:12px">{{ m.name }}<button sc-camel-on-click="{{ m.onRemove }}" style="color:var(--text-muted);font-size:11px" style-hover="color:var(--danger)">✕</button></span>
+</sc-for>
+<button sc-camel-on-click="{{ addMembership }}" style="height:22px;padding:0 8px;border:1px dashed var(--border-strong);border-radius:3px;font-size:12px;color:var(--text-secondary)" style-hover="color:var(--text-primary)">+ grant membership</button>
+</div>
+</div>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;align-items:center;gap:10px">
+<span style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Table privileges · schema public</span>
+<span style="font-size:11px;color:var(--text-muted)">click a cell to stage a GRANT or REVOKE</span>
+</div>
+<div style="border:1px solid var(--border-subtle);border-radius:3px;overflow:auto">
+<div style="{{ privHeadStyle }}">
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle)">Table</div>
+<sc-for list="{{ privCols }}" as="p" hint-placeholder-count="7">
+<div style="padding:5px 6px;text-align:center;border-right:1px solid var(--border-subtle)">{{ p }}</div>
+</sc-for>
+</div>
+<sc-for list="{{ privRows }}" as="r" hint-placeholder-count="7">
+<div style="{{ r.style }}" style-hover="background:var(--bg-hover)">
+<div style="display:flex;align-items:center;gap:6px;padding:0 10px;border-right:1px solid var(--border-subtle);font-family:'IBM Plex Mono',monospace;font-size:12px">{{ r.table }}</div>
+<sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="7">
+<div sc-camel-on-click="{{ c.onClick }}" style="{{ c.style }}"><span style="{{ c.markStyle }}">{{ c.mark }}</span></div>
+</sc-for>
+</div>
+</sc-for>
+</div>
+</div>
+<sc-if value="{{ grantReview }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Statements to run</div>
+<div style="border:1px solid var(--border-strong);border-radius:3px;background:var(--bg-inset);padding:10px 12px">
+<pre style="margin:0;font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:19px;white-space:pre-wrap">{{ grantSql }}</pre>
+</div>
+<div style="display:flex;align-items:center;gap:8px">
+<span style="font-size:12px;color:var(--text-secondary)">Runs inside <span style="font-family:'IBM Plex Mono',monospace">BEGIN … COMMIT</span> as <span style="font-family:'IBM Plex Mono',monospace">postgres</span>.</span>
+<span style="flex:1"></span>
+<button sc-camel-on-click="{{ toggleGrantReview }}" style="height:26px;padding:0 11px;border:1px solid var(--border-strong);border-radius:3px;font-size:13px">Close</button>
+<button sc-camel-on-click="{{ applyGrants }}" style="height:26px;padding:0 13px;border-radius:3px;background:var(--btn-primary);color:var(--text-inverse);font-size:13px;font-weight:500">Apply</button>
+</div>
+</div>
+</sc-if>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Active sessions · pg_stat_activity</div>
+<sc-if value="{{ hasSessions }}" hint-placeholder-val="{{ true }}">
+<div style="border:1px solid var(--border-subtle);border-radius:3px;overflow:hidden">
+<sc-for list="{{ sessions }}" as="s" hint-placeholder-count="3">
+<div style="{{ s.style }}">
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-muted);width:56px;flex:none">{{ s.pid }}</span>
+<span style="{{ s.stateStyle }}">{{ s.state }}</span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-secondary)">{{ s.query }}</span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-muted);white-space:nowrap">{{ s.age }}</span>
+<button sc-camel-on-click="{{ s.onKill }}" style="font-size:11px;color:var(--text-muted);white-space:nowrap" style-hover="color:var(--danger)">terminate</button>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ noSessions }}" hint-placeholder-val="{{ false }}">
+<div style="padding:20px;border:1px solid var(--border-subtle);border-radius:3px;text-align:center;color:var(--text-muted);font-size:13px">No open backends for <span style="font-family:'IBM Plex Mono',monospace">{{ role.name }}</span>.</div>
+</sc-if>
+</div>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isAiTab }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;min-height:0;overflow:auto">
+<div style="display:flex;gap:24px;padding:20px 22px 60px;align-items:flex-start;flex-wrap:wrap">
+<div style="flex:1;min-width:0;max-width:620px;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;gap:4px">
+<div style="font-size:20px;line-height:26px;font-weight:600">AI configuration</div>
+<div style="font-size:13px;line-height:18px;color:var(--text-secondary)">The key lives on the Comb server and never reaches the browser. The panel drafts SQL — it cannot execute.</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:10px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Provider</div>
+<div style="display:flex;gap:6px">
+<input value="{{ apiKey }}" sc-camel-on-change="{{ onApiKey }}" placeholder="sk-ant-…" style="flex:1;height:28px;padding:0 10px;background:var(--bg-raised);border:1px solid var(--border-strong);border-radius:3px;font-family:'IBM Plex Mono',monospace;font-size:13px">
+<button sc-camel-on-click="{{ testKey }}" style="height:28px;padding:0 11px;border:1px solid var(--border-strong);border-radius:3px;font-size:13px;white-space:nowrap">Test key</button>
+</div>
+<div style="{{ keyStateStyle }}">{{ keyState }}</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Model</div>
+<sc-for list="{{ models }}" as="m" hint-placeholder-count="3">
+<div sc-camel-on-click="{{ m.onClick }}" style="{{ m.style }}" style-hover="border-color:var(--border-strong)">
+<span style="{{ m.radioStyle }}"></span>
+<div style="display:flex;flex-direction:column;gap:2px;min-width:0">
+<span style="font-family:'IBM Plex Mono',monospace;font-size:13px">{{ m.id }}</span>
+<span style="font-size:12px;line-height:17px;color:var(--text-muted)">{{ m.note }}</span>
+</div>
+</div>
+</sc-for>
+<div style="font-size:12px;color:var(--text-muted)">Model ids are configuration, not code. Paste any id the API accepts.</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Context sent with every request</div>
+<div style="display:flex;align-items:center;justify-content:space-between;gap:16px">
+<div style="display:flex;flex-direction:column;gap:1px"><span style="font-size:13px;line-height:18px">Default mode</span><span style="font-size:11px;color:var(--text-muted)">What the panel starts on in every tab.</span></div>
+<div style="display:flex;border:1px solid var(--border-subtle);border-radius:3px;overflow:hidden;height:24px;flex:none">
+<sc-for list="{{ cfgCtxSegs }}" as="s" hint-placeholder-count="3"><button sc-camel-on-click="{{ s.onClick }}" style="{{ s.style }}">{{ s.label }}</button></sc-for>
+</div>
+</div>
+<div style="{{ hardOffRowStyle }}">
+<div style="display:flex;flex-direction:column;gap:1px"><span style="font-size:13px;line-height:18px">Never send row data</span><span style="font-size:11px;color:var(--text-muted)">Hard switch. Disables the samples mode rather than hiding it.</span></div>
+<button sc-camel-on-click="{{ toggleHardOff }}" style="{{ hardTrackStyle }}"><span style="{{ hardKnobStyle }}"></span></button>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px">
+<div style="display:flex;align-items:baseline;justify-content:space-between"><span style="{{ sampleLabelStyle }}">Sample rows per table</span><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-secondary)">{{ samples }}</span></div>
+<input type="range" min="1" max="20" value="{{ samples }}" sc-camel-on-change="{{ onSamples }}" disabled="{{ hardOff }}" style="{{ sliderStyle }}">
+</div>
+<div style="display:flex;flex-direction:column;gap:6px">
+<div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font-size:13px;line-height:18px">Token budget</span><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-secondary)">{{ budget }}k</span></div>
+<input type="range" min="8" max="200" value="{{ budget }}" sc-camel-on-change="{{ onBudget }}" style="{{ sliderStyle }}">
+<div style="font-size:12px;color:var(--text-muted)">Over budget, tables are ranked: referenced in the editor → open in tabs → row count, then truncated. The panel says which ones made it.</div>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Redacted column patterns</div>
+<div style="display:flex;gap:6px;flex-wrap:wrap">
+<sc-for list="{{ patterns }}" as="p" hint-placeholder-count="5">
+<span style="display:flex;align-items:center;gap:6px;height:22px;padding:0 8px;border:1px solid var(--border-subtle);border-radius:3px;font-family:'IBM Plex Mono',monospace;font-size:12px">{{ p.name }}<button sc-camel-on-click="{{ p.onRemove }}" style="color:var(--text-muted);font-size:11px" style-hover="color:var(--danger)">✕</button></span>
+</sc-for>
+</div>
+<div style="display:flex;gap:6px;max-width:320px">
+<input value="{{ newPat }}" sc-camel-on-change="{{ onNewPat }}" sc-camel-on-key-down="{{ onNewPatKey }}" placeholder="add a pattern, e.g. dob" style="flex:1;height:26px;padding:0 9px;background:var(--bg-raised);border:1px solid var(--border-strong);border-radius:3px;font-family:'IBM Plex Mono',monospace;font-size:12px">
+<button sc-camel-on-click="{{ addPat }}" style="height:26px;padding:0 10px;border:1px solid var(--border-strong);border-radius:3px;font-size:12px">Add</button>
+</div>
+<div style="font-size:12px;color:var(--text-muted)">Matching columns are replaced with <span style="font-family:'IBM Plex Mono',monospace">'***'</span> before serialization, server-side.</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:10px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Features</div>
+<sc-for list="{{ featToggles }}" as="t" hint-placeholder-count="6">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:16px">
+<div style="display:flex;align-items:baseline;gap:8px;min-width:0">
+<span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted);width:34px;flex:none">{{ t.id }}</span>
+<span style="font-size:13px;line-height:18px">{{ t.label }}</span>
+</div>
+<button sc-camel-on-click="{{ t.onClick }}" style="{{ t.trackStyle }}"><span style="{{ t.knobStyle }}"></span></button>
+</div>
+</sc-for>
+</div>
+</div>
+
+<div style="width:330px;flex:none;display:flex;flex-direction:column;gap:14px;position:sticky;top:0">
+<div style="border:1px solid var(--border-strong);border-radius:6px;background:var(--bg-raised);overflow:hidden">
+<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid var(--border-subtle)">
+<span style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">What gets sent</span>
+<span style="flex:1"></span>
+<span style="{{ tokenStyle }}">{{ tokenEst }}</span>
+</div>
+<div style="max-height:270px;overflow:auto;background:var(--bg-inset);padding:10px">
+<pre style="margin:0;font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:17px;white-space:pre-wrap;color:var(--text-secondary)">{{ payload }}</pre>
+</div>
+<div style="padding:8px 10px;border-top:1px solid var(--border-subtle);font-size:12px;line-height:17px;color:var(--text-muted)">{{ payloadNote }}</div>
+</div>
+<div style="border:1px solid var(--border-subtle);border-radius:6px;padding:10px;display:flex;flex-direction:column;gap:7px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Pinned output contract</div>
+<sc-for list="{{ contractRules }}" as="r" hint-placeholder-count="5">
+<div style="display:flex;gap:7px;font-size:12px;line-height:17px;color:var(--text-secondary)"><span style="color:var(--text-muted)">·</span>{{ r.text }}</div>
+</sc-for>
+<div style="margin-top:2px;padding-top:7px;border-top:1px solid var(--border-subtle);font-size:12px;line-height:17px;color:var(--text-muted)">No tool-calling into the database. There is no Run button in the AI panel.</div>
+</div>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isAuditTab }}" hint-placeholder-val="{{ false }}">
+<div style="height:34px;flex:none;display:flex;align-items:center;gap:6px;padding:0 10px;border-bottom:1px solid var(--border-subtle);background:var(--bg-raised);overflow-x:auto">
+<div style="display:flex;align-items:center;gap:6px;height:22px;padding:0 8px;background:var(--bg-base);border:1px solid var(--border-subtle);border-radius:3px;width:220px;flex:none">
+<input value="{{ auditQ }}" sc-camel-on-change="{{ onAuditQ }}" placeholder="statement, actor, table…" style="flex:1;font-family:'IBM Plex Mono',monospace;font-size:12px">
+</div>
+<sc-for list="{{ auditFilters }}" as="f" hint-placeholder-count="3">
+<div style="display:flex;align-items:stretch;border:1px solid var(--border-subtle);border-radius:3px;overflow:hidden;height:22px;flex:none">
+<span style="display:flex;align-items:center;padding:0 7px;font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);background:var(--bg-inset);border-right:1px solid var(--border-subtle)">{{ f.label }}</span>
+<sc-for list="{{ f.opts }}" as="o" hint-placeholder-count="3">
+<button sc-camel-on-click="{{ o.onClick }}" style="{{ o.style }}">{{ o.label }}</button>
+</sc-for>
+</div>
+</sc-for>
+<span style="flex:1;min-width:8px"></span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-muted);white-space:nowrap;flex:none">{{ auditCount }}</span>
+<button sc-camel-on-click="{{ exportAudit }}" style="height:22px;padding:0 9px;border:1px solid var(--border-strong);border-radius:3px;font-size:12px;white-space:nowrap;flex:none" style-hover="background:var(--bg-hover)">⤓ Export CSV</button>
+</div>
+<div style="flex:1;min-height:0;display:flex">
+<div style="flex:1;min-width:0;display:flex;flex-direction:column">
+<div style="flex:1;min-height:0;overflow:auto">
+<div style="{{ auditHeadStyle }}">
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle)">When</div>
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle)">Actor</div>
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle)">Connection</div>
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle)">Kind</div>
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle)">Target</div>
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle);text-align:right">Rows</div>
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle);text-align:right">Time</div>
+<div style="padding:5px 10px">Result</div>
+</div>
+<sc-for list="{{ auditRows }}" as="a" hint-placeholder-count="12">
+<div sc-camel-on-click="{{ a.onClick }}" style="{{ a.style }}" style-hover="background:var(--bg-hover)">
+<div style="{{ a.cell }}">{{ a.when }}</div>
+<div style="{{ a.cell }}">{{ a.actor }}</div>
+<div style="display:flex;align-items:center;gap:6px;padding:0 10px;border-right:1px solid var(--border-subtle);overflow:hidden">
+<span style="{{ a.barStyle }}"></span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ a.conn }}</span>
+</div>
+<div style="display:flex;align-items:center;padding:0 10px;border-right:1px solid var(--border-subtle)"><span style="{{ a.kindStyle }}">{{ a.kind }}</span></div>
+<div style="{{ a.cell }}">{{ a.target }}</div>
+<div style="{{ a.numCell }}">{{ a.rows }}</div>
+<div style="{{ a.numCell }}">{{ a.ms }}</div>
+<div style="display:flex;align-items:center;gap:6px;padding:0 10px"><span style="{{ a.statusStyle }}">{{ a.status }}</span></div>
+</div>
+</sc-for>
+<sc-if value="{{ auditEmpty }}" hint-placeholder-val="{{ false }}">
+<div style="padding:48px 20px;text-align:center">
+<div style="font-size:24px;line-height:30px;font-weight:600;margin-bottom:6px">Nothing in the trail matches.</div>
+<div style="font-size:14px;line-height:20px;color:var(--text-secondary)">Widen the window or clear the filters — the trail is append-only, so nothing was deleted.</div>
+</div>
+</sc-if>
+</div>
+<div style="height:26px;flex:none;display:flex;align-items:center;gap:12px;padding:0 10px;border-top:1px solid var(--border-subtle);background:var(--bg-raised);font-size:12px;color:var(--text-muted)">
+<span style="font-family:'IBM Plex Mono',monospace">retention 400 days · append-only · hash-chained</span>
+<span style="flex:1"></span>
+<span style="font-family:'IBM Plex Mono',monospace">{{ auditChain }}</span>
+</div>
+</div>
+<sc-if value="{{ auditSel }}" hint-placeholder-val="{{ false }}">
+<div style="width:400px;flex:none;background:var(--bg-raised);border-left:1px solid var(--border-subtle);display:flex;flex-direction:column;min-height:0">
+<div style="height:30px;flex:none;display:flex;align-items:center;gap:8px;padding:0 10px;border-bottom:1px solid var(--border-subtle)">
+<span style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Event {{ audit.id }}</span>
+<span style="flex:1"></span>
+<button sc-camel-on-click="{{ closeAudit }}" style="color:var(--text-muted);font-size:12px" style-hover="color:var(--text-primary)">✕</button>
+</div>
+<div style="flex:1;min-height:0;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:16px">
+<div style="border:1px solid var(--border-strong);border-radius:3px;background:var(--bg-inset);padding:9px 10px">
+<pre style="margin:0;font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:18px;white-space:pre-wrap">{{ audit.sql }}</pre>
+</div>
+<div style="display:grid;grid-template-columns:auto 1fr;gap:5px 12px;align-items:baseline">
+<sc-for list="{{ auditMeta }}" as="m" hint-placeholder-count="8">
+<span style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);white-space:nowrap">{{ m.k }}</span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:17px;overflow-wrap:anywhere">{{ m.v }}</span>
+</sc-for>
+</div>
+<sc-if value="{{ auditHasDiff }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:6px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Row-level diff · first 3 of {{ audit.rows }}</div>
+<div style="border:1px solid var(--border-subtle);border-radius:3px;overflow:hidden">
+<sc-for list="{{ auditDiff }}" as="d" hint-placeholder-count="3">
+<div style="{{ d.style }}">
+<span style="{{ d.signStyle }}">{{ d.sign }}</span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ d.text }}</span>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+<div style="display:flex;gap:6px;flex-wrap:wrap">
+<button sc-camel-on-click="{{ auditReopen }}" style="height:24px;padding:0 9px;border:1px solid var(--border-strong);border-radius:3px;font-size:12px" style-hover="background:var(--bg-hover)">Open in query tab</button>
+<button sc-camel-on-click="{{ auditRevert }}" style="height:24px;padding:0 9px;border:1px solid var(--border-strong);border-radius:3px;font-size:12px;color:var(--state-running)" style-hover="background:var(--bg-hover)">Draft compensating SQL</button>
+</div>
+</div>
+</div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ isTeamTab }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;min-height:0;overflow:auto">
+<div style="padding:20px 22px 60px;max-width:1000px;display:flex;flex-direction:column;gap:26px">
+<div style="display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap">
+<div style="display:flex;flex-direction:column;gap:4px">
+<div style="font-size:20px;line-height:26px;font-weight:600">Team &amp; access</div>
+<div style="font-size:13px;line-height:18px;color:var(--text-secondary)">Workspace membership governs who can see a connection. Database privileges still apply on top.</div>
+</div>
+<span style="flex:1"></span>
+<button sc-camel-on-click="{{ inviteMember }}" style="height:28px;padding:0 12px;border-radius:3px;background:var(--btn-primary);color:var(--text-inverse);font-size:13px;font-weight:500;white-space:nowrap">+ Invite</button>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;align-items:center;gap:10px">
+<span style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Members</span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-secondary)">{{ memberSummary }}</span>
+</div>
+<div style="border:1px solid var(--border-subtle);border-radius:3px;overflow:auto">
+<div style="{{ memberHeadStyle }}">
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle)">Member</div>
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle)">Workspace role</div>
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle)">Auth</div>
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle)">Connections</div>
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle)">Last active</div>
+<div style="padding:5px 10px">Status</div>
+</div>
+<sc-for list="{{ members }}" as="m" hint-placeholder-count="6">
+<div style="{{ m.style }}" style-hover="background:var(--bg-hover)">
+<div style="display:flex;flex-direction:column;justify-content:center;padding:0 10px;border-right:1px solid var(--border-subtle);overflow:hidden">
+<span style="font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ m.name }}</span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ m.email }}</span>
+</div>
+<div style="display:flex;align-items:center;padding:0 8px;border-right:1px solid var(--border-subtle)">
+<button sc-camel-on-click="{{ m.onRole }}" style="{{ m.roleStyle }}">{{ m.role }} ▾</button>
+</div>
+<div style="display:flex;align-items:center;gap:6px;padding:0 10px;border-right:1px solid var(--border-subtle)">
+<span style="{{ m.authStyle }}">{{ m.auth }}</span>
+<sc-if value="{{ m.mfa }}" hint-placeholder-val="{{ true }}"><span title="MFA enforced" style="font-size:10px;color:var(--state-success)">◆</span></sc-if>
+</div>
+<div style="display:flex;align-items:center;gap:3px;padding:0 10px;border-right:1px solid var(--border-subtle)">
+<sc-for list="{{ m.connDots }}" as="d" hint-placeholder-count="4"><span style="{{ d.style }}" title="{{ d.title }}"></span></sc-for>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted);margin-left:4px">{{ m.connLabel }}</span>
+</div>
+<div style="display:flex;align-items:center;padding:0 10px;border-right:1px solid var(--border-subtle);font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-secondary)">{{ m.seen }}</div>
+<div style="display:flex;align-items:center;gap:8px;padding:0 10px">
+<span style="{{ m.statusStyle }}">{{ m.status }}</span>
+<span style="flex:1"></span>
+<button sc-camel-on-click="{{ m.onRemove }}" style="font-size:11px;color:var(--text-muted);white-space:nowrap" style-hover="color:var(--danger)">{{ m.removeLabel }}</button>
+</div>
+</div>
+</sc-for>
+</div>
+</div>
+
+<div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start">
+<div style="flex:1;min-width:320px;display:flex;flex-direction:column;gap:10px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Single sign-on</div>
+<div style="border:1px solid var(--border-subtle);border-radius:3px;padding:12px;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;align-items:center;gap:10px">
+<span style="{{ ssoStatusStyle }}">{{ ssoStatus }}</span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-secondary)">SAML 2.0 · Okta</span>
+<span style="flex:1"></span>
+<button sc-camel-on-click="{{ toggleSso }}" style="{{ ssoTrackStyle }}"><span style="{{ ssoKnobStyle }}"></span></button>
+</div>
+<div style="display:grid;grid-template-columns:auto 1fr;gap:6px 12px;align-items:center">
+<span style="font-size:12px;color:var(--text-secondary)">IdP metadata</span>
+<span style="height:26px;display:flex;align-items:center;padding:0 9px;background:var(--bg-raised);border:1px solid var(--border-strong);border-radius:3px;font-family:'IBM Plex Mono',monospace;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">https://acme.okta.com/app/…/sso/saml/metadata</span>
+<span style="font-size:12px;color:var(--text-secondary)">ACS URL</span>
+<span style="height:26px;display:flex;align-items:center;padding:0 9px;background:var(--bg-raised);border:1px solid var(--border-strong);border-radius:3px;font-family:'IBM Plex Mono',monospace;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">https://comb.acme.internal/sso/acs</span>
+<span style="font-size:12px;color:var(--text-secondary)">Domains</span>
+<div style="display:flex;gap:6px;flex-wrap:wrap"><span style="height:22px;display:flex;align-items:center;padding:0 8px;border:1px solid var(--border-subtle);border-radius:3px;font-family:'IBM Plex Mono',monospace;font-size:12px">acme.com</span><span style="height:22px;display:flex;align-items:center;padding:0 8px;border:1px solid var(--border-subtle);border-radius:3px;font-family:'IBM Plex Mono',monospace;font-size:12px">acme.io</span></div>
+</div>
+<sc-for list="{{ ssoToggles }}" as="t" hint-placeholder-count="3">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:14px">
+<div style="display:flex;flex-direction:column;gap:1px"><span style="font-size:13px;line-height:18px">{{ t.label }}</span><span style="font-size:11px;color:var(--text-muted)">{{ t.hint }}</span></div>
+<button sc-camel-on-click="{{ t.onClick }}" style="{{ t.trackStyle }}"><span style="{{ t.knobStyle }}"></span></button>
+</div>
+</sc-for>
+</div>
+</div>
+<div style="flex:1;min-width:320px;display:flex;flex-direction:column;gap:10px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">IdP group → workspace role</div>
+<div style="border:1px solid var(--border-subtle);border-radius:3px;overflow:hidden">
+<sc-for list="{{ groupMaps }}" as="g" hint-placeholder-count="4">
+<div style="{{ g.style }}">
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ g.group }}</span>
+<span style="color:var(--text-muted);font-size:11px">→</span>
+<span style="{{ g.roleStyle }}">{{ g.role }}</span>
+<button sc-camel-on-click="{{ g.onRemove }}" style="font-size:11px;color:var(--text-muted)" style-hover="color:var(--danger)">✕</button>
+</div>
+</sc-for>
+<div style="padding:7px 10px;border-top:1px solid var(--border-subtle)">
+<button sc-camel-on-click="{{ addGroupMap }}" style="font-size:12px;color:var(--state-info)">+ map another group</button>
+</div>
+</div>
+<div style="font-size:12px;line-height:17px;color:var(--text-muted)">Unmapped groups get no access at all — a member who signs in without a mapped group lands on an empty launcher, not on someone else's production database.</div>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;align-items:center;gap:10px">
+<span style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Connection access</span>
+<span style="font-size:11px;color:var(--text-muted)">click to cycle none → read → write → admin</span>
+</div>
+<div style="border:1px solid var(--border-subtle);border-radius:3px;overflow:auto">
+<div style="{{ accessHeadStyle }}">
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle)">Member</div>
+<sc-for list="{{ accessCols }}" as="c" hint-placeholder-count="4">
+<div style="padding:5px 8px;border-right:1px solid var(--border-subtle);display:flex;align-items:center;gap:6px">
+<span style="{{ c.barStyle }}"></span><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ c.name }}</span>
+</div>
+</sc-for>
+</div>
+<sc-for list="{{ accessRows }}" as="r" hint-placeholder-count="5">
+<div style="{{ r.style }}" style-hover="background:var(--bg-hover)">
+<div style="display:flex;align-items:center;padding:0 10px;border-right:1px solid var(--border-subtle);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.name }}</div>
+<sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="4">
+<div sc-camel-on-click="{{ c.onClick }}" style="{{ c.style }}"><span style="{{ c.labelStyle }}">{{ c.label }}</span></div>
+</sc-for>
+</div>
+</sc-for>
+</div>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isMonitorTab }}" hint-placeholder-val="{{ false }}">
+<div style="height:34px;flex:none;display:flex;align-items:center;gap:10px;padding:0 10px;border-bottom:1px solid var(--border-subtle);background:var(--bg-raised);overflow-x:auto">
+<span style="display:flex;align-items:center;gap:6px;white-space:nowrap;flex:none"><span style="{{ liveDotStyle }}"></span><span style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-secondary)">{{ liveLabel }}</span></span>
+<div style="display:flex;align-items:stretch;border:1px solid var(--border-subtle);border-radius:3px;overflow:hidden;height:22px;flex:none">
+<sc-for list="{{ rangeSegs }}" as="s" hint-placeholder-count="4"><button sc-camel-on-click="{{ s.onClick }}" style="{{ s.style }}">{{ s.label }}</button></sc-for>
+</div>
+<button sc-camel-on-click="{{ toggleLive }}" style="height:22px;padding:0 9px;border:1px solid var(--border-strong);border-radius:3px;font-size:12px;white-space:nowrap;flex:none" style-hover="background:var(--bg-hover)">{{ liveBtn }}</button>
+<span style="flex:1;min-width:8px"></span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-muted);white-space:nowrap;flex:none">db.internal · 16.3 · uptime 41d</span>
+</div>
+<div style="flex:1;min-height:0;overflow:auto">
+<div style="padding:14px;display:flex;flex-direction:column;gap:18px">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:10px">
+<sc-for list="{{ kpis }}" as="k" hint-placeholder-count="6">
+<div style="{{ k.style }}">
+<div style="display:flex;align-items:baseline;gap:7px">
+<span style="{{ k.valueStyle }}">{{ k.value }}</span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-muted)">{{ k.unit }}</span>
+</div>
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">{{ k.label }}</div>
+<div style="display:flex;align-items:flex-end;gap:2px;height:22px">
+<sc-for list="{{ k.bars }}" as="b" hint-placeholder-count="12"><span style="{{ b.style }}"></span></sc-for>
+</div>
+<div style="{{ k.noteStyle }}">{{ k.note }}</div>
+</div>
+</sc-for>
+</div>
+
+<sc-if value="{{ hasAlerts }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Open alerts</div>
+<sc-for list="{{ alerts }}" as="a" hint-placeholder-count="2">
+<div style="{{ a.style }}">
+<span style="{{ a.sevStyle }}">{{ a.sev }}</span>
+<div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0">
+<span style="font-size:13px;line-height:18px">{{ a.title }}</span>
+<span style="font-size:12px;line-height:17px;color:var(--text-secondary)">{{ a.body }}</span>
+</div>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted);white-space:nowrap">{{ a.age }}</span>
+<button sc-camel-on-click="{{ a.onAck }}" style="height:22px;padding:0 8px;border:1px solid var(--border-strong);border-radius:3px;font-size:12px;white-space:nowrap" style-hover="background:var(--bg-hover)">Ack</button>
+</div>
+</sc-for>
+</div>
+</sc-if>
+
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;align-items:center;gap:10px">
+<span style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Slowest statements · pg_stat_statements</span>
+<span style="flex:1"></span>
+<div style="display:flex;align-items:stretch;border:1px solid var(--border-subtle);border-radius:3px;overflow:hidden;height:22px">
+<sc-for list="{{ slowSegs }}" as="s" hint-placeholder-count="3"><button sc-camel-on-click="{{ s.onClick }}" style="{{ s.style }}">{{ s.label }}</button></sc-for>
+</div>
+</div>
+<div style="border:1px solid var(--border-subtle);border-radius:3px;overflow:auto">
+<div style="{{ slowHeadStyle }}">
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle)">Normalised statement</div>
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle);text-align:right">Calls</div>
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle);text-align:right">Mean</div>
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle);text-align:right">Total</div>
+<div style="padding:5px 10px">Share</div>
+</div>
+<sc-for list="{{ slowRows }}" as="s" hint-placeholder-count="6">
+<div style="{{ s.style }}" style-hover="background:var(--bg-hover)">
+<div style="display:flex;align-items:center;padding:0 10px;border-right:1px solid var(--border-subtle);font-family:'IBM Plex Mono',monospace;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ s.sql }}</div>
+<div style="{{ s.numCell }}">{{ s.calls }}</div>
+<div style="{{ s.meanCell }}">{{ s.mean }}</div>
+<div style="{{ s.numCell }}">{{ s.total }}</div>
+<div style="display:flex;align-items:center;gap:7px;padding:0 10px">
+<span style="{{ s.barStyle }}"></span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted)">{{ s.share }}</span>
+<button sc-camel-on-click="{{ s.onOpen }}" style="font-size:11px;color:var(--state-info);white-space:nowrap">explain</button>
+</div>
+</div>
+</sc-for>
+</div>
+</div>
+
+<div style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start">
+<div style="flex:1;min-width:340px;display:flex;flex-direction:column;gap:8px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Blocking tree · pg_locks</div>
+<div style="border:1px solid var(--border-subtle);border-radius:3px;overflow:hidden">
+<sc-for list="{{ lockRows }}" as="l" hint-placeholder-count="4">
+<div style="{{ l.style }}">
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-muted);width:52px;flex:none">{{ l.pid }}</span>
+<span style="{{ l.tagStyle }}">{{ l.tag }}</span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-secondary)">{{ l.text }}</span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted);white-space:nowrap">{{ l.wait }}</span>
+<button sc-camel-on-click="{{ l.onKill }}" style="font-size:11px;color:var(--text-muted);white-space:nowrap" style-hover="color:var(--danger)">terminate</button>
+</div>
+</sc-for>
+</div>
+</div>
+<div style="flex:1;min-width:340px;display:flex;flex-direction:column;gap:8px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Table health</div>
+<div style="border:1px solid var(--border-subtle);border-radius:3px;overflow:hidden">
+<sc-for list="{{ healthRows }}" as="h" hint-placeholder-count="5">
+<div style="{{ h.style }}">
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;width:112px;flex:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ h.table }}</span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted);width:62px;flex:none;text-align:right">{{ h.size }}</span>
+<div style="flex:1;min-width:60px;height:6px;background:var(--bg-inset);border-radius:3px;overflow:hidden"><span style="{{ h.fillStyle }}"></span></div>
+<span style="{{ h.bloatStyle }}">{{ h.bloat }}</span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted);white-space:nowrap">{{ h.vac }}</span>
+</div>
+</sc-for>
+</div>
+<div style="font-size:12px;line-height:17px;color:var(--text-muted)">Bloat is estimated from pgstattuple samples, not exact — treat above 30% as a hint to look, not a verdict.</div>
+</div>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isMigrationsTab }}" hint-placeholder-val="{{ false }}">
+<div style="height:34px;flex:none;display:flex;align-items:center;gap:8px;padding:0 10px;border-bottom:1px solid var(--border-subtle);background:var(--bg-raised);overflow-x:auto">
+<span style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);white-space:nowrap;flex:none">Migrations</span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-secondary);white-space:nowrap;flex:none">{{ migSummary }}</span>
+<span style="flex:1;min-width:8px"></span>
+<button sc-camel-on-click="{{ newMigration }}" style="height:22px;padding:0 9px;border:1px solid var(--border-strong);border-radius:3px;font-size:12px;white-space:nowrap;flex:none" style-hover="background:var(--bg-hover)">+ New</button>
+<button sc-camel-on-click="{{ driftCheck }}" style="height:22px;padding:0 9px;border:1px solid var(--border-strong);border-radius:3px;font-size:12px;white-space:nowrap;flex:none" style-hover="background:var(--bg-hover)">⟳ Check drift</button>
+</div>
+<div style="flex:1;min-height:0;display:flex">
+<div style="width:290px;flex:none;border-right:1px solid var(--border-subtle);background:var(--bg-raised);overflow:auto">
+<sc-for list="{{ migList }}" as="m" hint-placeholder-count="7">
+<div sc-camel-on-click="{{ m.onClick }}" style="{{ m.style }}" style-hover="background:var(--bg-hover)">
+<div style="display:flex;align-items:center;gap:7px;min-width:0">
+<span style="{{ m.dotStyle }}"></span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ m.version }}</span>
+<span style="flex:1"></span>
+<span style="{{ m.stateStyle }}">{{ m.state }}</span>
+</div>
+<span style="font-size:12px;line-height:17px;color:var(--text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ m.name }}</span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted)">{{ m.meta }}</span>
+</div>
+</sc-for>
+</div>
+<div style="flex:1;min-width:0;overflow:auto">
+<div style="padding:16px 18px 50px;max-width:820px;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap">
+<div style="display:flex;flex-direction:column;gap:3px;min-width:0">
+<div style="font-family:'IBM Plex Mono',monospace;font-size:18px;line-height:24px;font-weight:500">{{ mig.version }}</div>
+<div style="font-size:14px;line-height:20px;color:var(--text-secondary)">{{ mig.name }}</div>
+</div>
+<span style="flex:1"></span>
+<div style="display:flex;gap:6px">
+<button sc-camel-on-click="{{ migDryRun }}" style="height:26px;padding:0 11px;border:1px solid var(--border-strong);border-radius:3px;font-size:12px;white-space:nowrap" style-hover="background:var(--bg-hover)">Dry run</button>
+<button sc-camel-on-click="{{ migApply }}" style="{{ migApplyStyle }}">{{ migApplyLabel }}</button>
+</div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:9px">
+<sc-for list="{{ migFacts }}" as="k" hint-placeholder-count="4">
+<div style="display:flex;flex-direction:column;gap:2px;padding:8px 10px;border:1px solid var(--border-subtle);border-radius:3px">
+<span style="{{ k.valueStyle }}">{{ k.value }}</span>
+<span style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">{{ k.label }}</span>
+</div>
+</sc-for>
+</div>
+<sc-if value="{{ migHasLock }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;align-items:flex-start;gap:9px;padding:9px 11px;border:1px solid var(--border-strong);border-left:3px solid var(--state-running);border-radius:3px">
+<span style="color:var(--state-running);font-size:13px">⚠</span>
+<div style="display:flex;flex-direction:column;gap:3px">
+<span style="font-size:13px;line-height:18px">{{ migLockTitle }}</span>
+<span style="font-size:12px;line-height:17px;color:var(--text-secondary)">{{ migLockBody }}</span>
+</div>
+</div>
+</sc-if>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;align-items:center;gap:10px">
+<span style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Statements</span>
+<span style="flex:1"></span>
+<div style="display:flex;align-items:stretch;border:1px solid var(--border-subtle);border-radius:3px;overflow:hidden;height:22px">
+<sc-for list="{{ migDirSegs }}" as="s" hint-placeholder-count="2"><button sc-camel-on-click="{{ s.onClick }}" style="{{ s.style }}">{{ s.label }}</button></sc-for>
+</div>
+</div>
+<div style="border:1px solid var(--border-strong);border-radius:3px;background:var(--bg-inset);overflow:auto">
+<sc-for list="{{ migLines }}" as="l" hint-placeholder-count="10">
+<div style="display:flex;gap:12px;padding:0 12px">
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:19px;color:var(--text-muted);width:20px;text-align:right;flex:none;user-select:none">{{ l.n }}</span>
+<span style="{{ l.style }}">{{ l.text }}</span>
+</div>
+</sc-for>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Catalog diff this produces</div>
+<div style="border:1px solid var(--border-subtle);border-radius:3px;overflow:hidden">
+<sc-for list="{{ migDiff }}" as="d" hint-placeholder-count="4">
+<div style="{{ d.style }}">
+<span style="{{ d.signStyle }}">{{ d.sign }}</span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ d.text }}</span>
+<span style="flex:1"></span>
+<span style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;color:var(--text-muted);white-space:nowrap">{{ d.note }}</span>
+</div>
+</sc-for>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Promotion across environments</div>
+<div style="display:flex;align-items:stretch;gap:8px;flex-wrap:wrap">
+<sc-for list="{{ migEnvs }}" as="e" hint-placeholder-count="4">
+<div style="{{ e.style }}">
+<div style="display:flex;align-items:center;gap:7px">
+<span style="{{ e.barStyle }}"></span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px">{{ e.name }}</span>
+</div>
+<span style="{{ e.stateStyle }}">{{ e.state }}</span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted)">{{ e.when }}</span>
+</div>
+</sc-for>
+</div>
+</div>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isJobsTab }}" hint-placeholder-val="{{ false }}">
+<div style="height:34px;flex:none;display:flex;align-items:center;gap:8px;padding:0 10px;border-bottom:1px solid var(--border-subtle);background:var(--bg-raised);overflow-x:auto">
+<div style="display:flex;align-items:stretch;border:1px solid var(--border-subtle);border-radius:3px;overflow:hidden;height:22px;flex:none">
+<sc-for list="{{ jobSegs }}" as="s" hint-placeholder-count="3"><button sc-camel-on-click="{{ s.onClick }}" style="{{ s.style }}">{{ s.label }}</button></sc-for>
+</div>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-secondary);white-space:nowrap;flex:none">{{ jobSummary }}</span>
+<span style="flex:1;min-width:8px"></span>
+<button sc-camel-on-click="{{ newJob }}" style="height:22px;padding:0 10px;border-radius:3px;background:var(--btn-primary);color:var(--text-inverse);font-size:12px;font-weight:500;white-space:nowrap;flex:none">+ New schedule</button>
+</div>
+<div style="flex:1;min-height:0;overflow:auto">
+<div style="padding:14px;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="border:1px solid var(--border-subtle);border-radius:3px;overflow:auto">
+<div style="{{ jobHeadStyle }}">
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle)">Job</div>
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle)">Schedule</div>
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle)">Target</div>
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle)">Delivery</div>
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle)">Last 7 runs</div>
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle)">Next</div>
+<div style="padding:5px 10px">State</div>
+</div>
+<sc-for list="{{ jobRows }}" as="j" hint-placeholder-count="6">
+<div sc-camel-on-click="{{ j.onClick }}" style="{{ j.style }}" style-hover="background:var(--bg-hover)">
+<div style="display:flex;flex-direction:column;justify-content:center;padding:0 10px;border-right:1px solid var(--border-subtle);overflow:hidden">
+<span style="font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ j.name }}</span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted)">{{ j.kind }}</span>
+</div>
+<div style="display:flex;align-items:center;padding:0 10px;border-right:1px solid var(--border-subtle);font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ j.cron }}</div>
+<div style="display:flex;align-items:center;gap:6px;padding:0 10px;border-right:1px solid var(--border-subtle);overflow:hidden">
+<span style="{{ j.barStyle }}"></span><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ j.conn }}</span>
+</div>
+<div style="display:flex;align-items:center;padding:0 10px;border-right:1px solid var(--border-subtle);font-size:12px;color:var(--text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ j.dest }}</div>
+<div style="display:flex;align-items:center;gap:3px;padding:0 10px;border-right:1px solid var(--border-subtle)">
+<sc-for list="{{ j.runs }}" as="r" hint-placeholder-count="7"><span style="{{ r.style }}" title="{{ r.title }}"></span></sc-for>
+</div>
+<div style="display:flex;align-items:center;padding:0 10px;border-right:1px solid var(--border-subtle);font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-muted);white-space:nowrap">{{ j.next }}</div>
+<div style="display:flex;align-items:center;gap:8px;padding:0 10px">
+<span style="{{ j.stateStyle }}">{{ j.state }}</span>
+<span style="flex:1"></span>
+<button sc-camel-on-click="{{ j.onToggle }}" style="font-size:11px;color:var(--text-muted);white-space:nowrap" style-hover="color:var(--text-primary)">{{ j.toggleLabel }}</button>
+</div>
+</div>
+</sc-for>
+</div>
+</div>
+<sc-if value="{{ jobSel }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start">
+<div style="flex:1;min-width:330px;display:flex;flex-direction:column;gap:8px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Run history · {{ job.name }}</div>
+<div style="border:1px solid var(--border-subtle);border-radius:3px;overflow:hidden">
+<sc-for list="{{ jobHistory }}" as="h" hint-placeholder-count="6">
+<div style="{{ h.style }}">
+<span style="{{ h.dotStyle }}"></span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;width:104px;flex:none">{{ h.when }}</span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-secondary);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ h.detail }}</span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted);white-space:nowrap">{{ h.dur }}</span>
+<sc-if value="{{ h.failed }}" hint-placeholder-val="{{ false }}">
+<button sc-camel-on-click="{{ h.onRetry }}" style="font-size:11px;color:var(--state-info);white-space:nowrap">retry</button>
+</sc-if>
+</div>
+</sc-for>
+</div>
+</div>
+<div style="flex:1;min-width:330px;display:flex;flex-direction:column;gap:8px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Definition</div>
+<div style="border:1px solid var(--border-strong);border-radius:3px;background:var(--bg-inset);padding:10px 12px">
+<pre style="margin:0;font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:19px;white-space:pre-wrap">{{ jobSql }}</pre>
+</div>
+<div style="display:flex;flex-direction:column;gap:9px;padding:10px;border:1px solid var(--border-subtle);border-radius:3px">
+<sc-for list="{{ jobOpts }}" as="o" hint-placeholder-count="4">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:14px">
+<div style="display:flex;flex-direction:column;gap:1px"><span style="font-size:13px;line-height:18px">{{ o.label }}</span><span style="font-size:11px;color:var(--text-muted)">{{ o.hint }}</span></div>
+<button sc-camel-on-click="{{ o.onClick }}" style="{{ o.trackStyle }}"><span style="{{ o.knobStyle }}"></span></button>
+</div>
+</sc-for>
+</div>
+</div>
+</div>
+</sc-if>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isApprovalsTab }}" hint-placeholder-val="{{ false }}">
+<div style="height:34px;flex:none;display:flex;align-items:center;gap:8px;padding:0 10px;border-bottom:1px solid var(--border-subtle);background:var(--bg-raised);overflow-x:auto">
+<div style="display:flex;align-items:stretch;border:1px solid var(--border-subtle);border-radius:3px;overflow:hidden;height:22px;flex:none">
+<sc-for list="{{ apprSegs }}" as="s" hint-placeholder-count="3"><button sc-camel-on-click="{{ s.onClick }}" style="{{ s.style }}">{{ s.label }}</button></sc-for>
+</div>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-secondary);white-space:nowrap;flex:none">{{ apprSummary }}</span>
+<span style="flex:1;min-width:8px"></span>
+<span style="font-size:12px;color:var(--text-muted);white-space:nowrap;flex:none">Policy: writes on prod need one approver who did not author them</span>
+</div>
+<div style="flex:1;min-height:0;display:flex">
+<div style="width:330px;flex:none;border-right:1px solid var(--border-subtle);background:var(--bg-raised);overflow:auto">
+<sc-for list="{{ apprList }}" as="a" hint-placeholder-count="5">
+<div sc-camel-on-click="{{ a.onClick }}" style="{{ a.style }}" style-hover="background:var(--bg-hover)">
+<div style="display:flex;align-items:center;gap:7px;min-width:0">
+<span style="{{ a.kindStyle }}">{{ a.kind }}</span>
+<span style="flex:1"></span>
+<span style="{{ a.stateStyle }}">{{ a.state }}</span>
+</div>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ a.title }}</span>
+<div style="display:flex;align-items:center;gap:7px">
+<span style="{{ a.barStyle }}"></span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ a.meta }}</span>
+</div>
+</div>
+</sc-for>
+<sc-if value="{{ apprEmpty }}" hint-placeholder-val="{{ false }}">
+<div style="padding:32px 16px;text-align:center;color:var(--text-muted);font-size:12px;line-height:17px">Nothing here. An empty queue is the goal, not a bug.</div>
+</sc-if>
+</div>
+<div style="flex:1;min-width:0;overflow:auto">
+<sc-if value="{{ apprSel }}" hint-placeholder-val="{{ true }}">
+<div style="padding:16px 18px 50px;max-width:800px;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap">
+<div style="display:flex;flex-direction:column;gap:4px;min-width:0">
+<div style="display:flex;align-items:center;gap:9px">
+<span style="{{ appr.kindStyle }}">{{ appr.kind }}</span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:18px;line-height:24px;font-weight:500">{{ appr.id }}</span>
+</div>
+<div style="font-size:14px;line-height:20px;color:var(--text-secondary)">{{ appr.summary }}</div>
+</div>
+<span style="flex:1"></span>
+<div style="display:flex;gap:6px">
+<button sc-camel-on-click="{{ apprReject }}" style="height:26px;padding:0 11px;border:1px solid var(--border-strong);border-radius:3px;font-size:12px;color:var(--danger);white-space:nowrap" style-hover="background:color-mix(in oklab, var(--danger) 12%, transparent)">Reject</button>
+<button sc-camel-on-click="{{ apprApprove }}" style="{{ apprBtnStyle }}">{{ apprBtnLabel }}</button>
+</div>
+</div>
+<div style="border:1px solid var(--border-strong);border-radius:3px;background:var(--bg-inset);padding:10px 12px">
+<pre style="margin:0;font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:19px;white-space:pre-wrap">{{ appr.sql }}</pre>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:9px">
+<sc-for list="{{ apprFacts }}" as="k" hint-placeholder-count="4">
+<div style="display:flex;flex-direction:column;gap:2px;padding:8px 10px;border:1px solid var(--border-subtle);border-radius:3px">
+<span style="{{ k.valueStyle }}">{{ k.value }}</span>
+<span style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">{{ k.label }}</span>
+</div>
+</sc-for>
+</div>
+<sc-if value="{{ apprWarn }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;align-items:flex-start;gap:9px;padding:9px 11px;border:1px solid var(--border-strong);border-left:3px solid var(--state-running);border-radius:3px">
+<span style="color:var(--state-running);font-size:13px">⚠</span>
+<div style="display:flex;flex-direction:column;gap:3px">
+<span style="font-size:13px;line-height:18px">{{ apprWarnTitle }}</span>
+<span style="font-size:12px;line-height:17px;color:var(--text-secondary)">{{ apprWarnBody }}</span>
+</div>
+</div>
+</sc-if>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Dry run against a branch of the schema</div>
+<div style="border:1px solid var(--border-subtle);border-radius:3px;overflow:hidden">
+<sc-for list="{{ apprDry }}" as="d" hint-placeholder-count="4">
+<div style="{{ d.style }}">
+<span style="{{ d.iconStyle }}">{{ d.icon }}</span>
+<span style="font-size:12px;line-height:17px;flex:1;min-width:0">{{ d.text }}</span>
+</div>
+</sc-for>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Thread</div>
+<sc-for list="{{ apprThread }}" as="t" hint-placeholder-count="3">
+<div style="display:flex;gap:10px;padding:8px 0;border-top:1px solid var(--border-subtle)">
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-muted);width:88px;flex:none">{{ t.who }}</span>
+<span style="font-size:13px;line-height:19px;flex:1;min-width:0">{{ t.text }}</span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted);white-space:nowrap">{{ t.when }}</span>
+</div>
+</sc-for>
+<div style="display:flex;gap:6px">
+<input value="{{ apprNote }}" sc-camel-on-change="{{ onApprNote }}" placeholder="Add a note before deciding…" style="flex:1;height:28px;padding:0 10px;background:var(--bg-raised);border:1px solid var(--border-strong);border-radius:3px;font-size:13px">
+<button sc-camel-on-click="{{ addApprNote }}" style="height:28px;padding:0 11px;border:1px solid var(--border-strong);border-radius:3px;font-size:13px">Comment</button>
+</div>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ apprNone }}" hint-placeholder-val="{{ false }}">
+<div style="height:100%;display:grid;place-items:center;padding:40px">
+<div style="text-align:center;max-width:320px">
+<div style="font-size:24px;line-height:30px;font-weight:600;margin-bottom:6px">Queue is clear.</div>
+<div style="font-size:14px;line-height:20px;color:var(--text-secondary)">No statement is waiting on a human. Writes on non-prod connections never come through here.</div>
+</div>
+</div>
+</sc-if>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isCatalogTab }}" hint-placeholder-val="{{ false }}">
+<div style="height:34px;flex:none;display:flex;align-items:center;gap:8px;padding:0 10px;border-bottom:1px solid var(--border-subtle);background:var(--bg-raised);overflow-x:auto">
+<div style="display:flex;align-items:center;gap:6px;height:22px;padding:0 8px;background:var(--bg-base);border:1px solid var(--border-subtle);border-radius:3px;width:210px;flex:none">
+<input value="{{ catQ }}" sc-camel-on-change="{{ onCatQ }}" placeholder="column, table, owner, tag…" style="flex:1;font-family:'IBM Plex Mono',monospace;font-size:12px">
+</div>
+<div style="display:flex;align-items:stretch;border:1px solid var(--border-subtle);border-radius:3px;overflow:hidden;height:22px;flex:none">
+<sc-for list="{{ catSegs }}" as="s" hint-placeholder-count="4"><button sc-camel-on-click="{{ s.onClick }}" style="{{ s.style }}">{{ s.label }}</button></sc-for>
+</div>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-secondary);white-space:nowrap;flex:none">{{ catSummary }}</span>
+<span style="flex:1;min-width:8px"></span>
+<button sc-camel-on-click="{{ rescan }}" style="height:22px;padding:0 9px;border:1px solid var(--border-strong);border-radius:3px;font-size:12px;white-space:nowrap;flex:none" style-hover="background:var(--bg-hover)">⟳ Rescan for PII</button>
+</div>
+<div style="flex:1;min-height:0;display:flex">
+<div style="flex:1;min-width:0;overflow:auto">
+<div style="{{ catHeadStyle }}">
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle)">Column</div>
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle)">Type</div>
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle)">Classification</div>
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle)">Masking</div>
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle)">Owner</div>
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle)">Description</div>
+<div style="padding:5px 10px">Used by</div>
+</div>
+<sc-for list="{{ catRows }}" as="c" hint-placeholder-count="12">
+<div sc-camel-on-click="{{ c.onClick }}" style="{{ c.style }}" style-hover="background:var(--bg-hover)">
+<div style="display:flex;align-items:center;gap:7px;padding:0 10px;border-right:1px solid var(--border-subtle);overflow:hidden">
+<span style="{{ c.tickStyle }}"></span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ c.name }}</span>
+</div>
+<div style="display:flex;align-items:center;padding:0 10px;border-right:1px solid var(--border-subtle);font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-secondary)">{{ c.type }}</div>
+<div style="display:flex;align-items:center;padding:0 8px;border-right:1px solid var(--border-subtle)">
+<button sc-camel-on-click="{{ c.onClass }}" style="{{ c.classStyle }}">{{ c.klass }}</button>
+</div>
+<div style="display:flex;align-items:center;padding:0 8px;border-right:1px solid var(--border-subtle)">
+<button sc-camel-on-click="{{ c.onMask }}" style="{{ c.maskStyle }}">{{ c.mask }}</button>
+</div>
+<div style="display:flex;align-items:center;padding:0 10px;border-right:1px solid var(--border-subtle);font-size:12px;color:var(--text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ c.owner }}</div>
+<div style="display:flex;align-items:center;padding:0 10px;border-right:1px solid var(--border-subtle);font-size:12px;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ c.desc }}</div>
+<div style="display:flex;align-items:center;gap:6px;padding:0 10px;overflow:hidden">
+<span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted);white-space:nowrap">{{ c.usage }}</span>
+</div>
+</div>
+</sc-for>
+<sc-if value="{{ catEmpty }}" hint-placeholder-val="{{ false }}">
+<div style="padding:44px 20px;text-align:center">
+<div style="font-size:24px;line-height:30px;font-weight:600;margin-bottom:6px">No columns match.</div>
+<div style="font-size:14px;line-height:20px;color:var(--text-secondary)">The catalog covers 42 tables and 318 columns in this connection.</div>
+</div>
+</sc-if>
+</div>
+<sc-if value="{{ catSel }}" hint-placeholder-val="{{ true }}">
+<div style="width:340px;flex:none;background:var(--bg-raised);border-left:1px solid var(--border-subtle);display:flex;flex-direction:column;min-height:0">
+<div style="height:30px;flex:none;display:flex;align-items:center;gap:8px;padding:0 10px;border-bottom:1px solid var(--border-subtle)">
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ cat.name }}</span>
+<span style="flex:1"></span>
+<button sc-camel-on-click="{{ closeCat }}" style="color:var(--text-muted);font-size:12px" style-hover="color:var(--text-primary)">✕</button>
+</div>
+<div style="flex:1;min-height:0;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;flex-direction:column;gap:6px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Profile · sampled 10k rows</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:7px">
+<sc-for list="{{ catStats }}" as="s" hint-placeholder-count="4">
+<div style="display:flex;flex-direction:column;gap:1px;padding:7px 9px;border:1px solid var(--border-subtle);border-radius:3px">
+<span style="font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:500">{{ s.value }}</span>
+<span style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">{{ s.label }}</span>
+</div>
+</sc-for>
+</div>
+<div style="display:flex;align-items:flex-end;gap:2px;height:44px;padding:8px;border:1px solid var(--border-subtle);border-radius:3px">
+<sc-for list="{{ catHist }}" as="h" hint-placeholder-count="14"><span style="{{ h.style }}" title="{{ h.title }}"></span></sc-for>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Lineage</div>
+<sc-for list="{{ catLineage }}" as="l" hint-placeholder-count="4">
+<div style="{{ l.style }}">
+<span style="{{ l.arrowStyle }}">{{ l.arrow }}</span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ l.name }}</span>
+<span style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;color:var(--text-muted);white-space:nowrap">{{ l.kind }}</span>
+</div>
+</sc-for>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Access in the last 30 days</div>
+<sc-for list="{{ catAccess }}" as="a" hint-placeholder-count="3">
+<div style="display:flex;align-items:center;gap:9px;height:22px">
+<span style="font-size:12px;width:96px;flex:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ a.who }}</span>
+<div style="flex:1;height:6px;background:var(--bg-inset);border-radius:3px;overflow:hidden"><span style="{{ a.fillStyle }}"></span></div>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted);white-space:nowrap">{{ a.n }}</span>
+</div>
+</sc-for>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Retention</div>
+<div style="font-size:12px;line-height:17px;color:var(--text-secondary)">{{ catRetention }}</div>
+</div>
+</div>
+</div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ isBackupTab }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;min-height:0;overflow:auto">
+<div style="padding:16px 18px 50px;max-width:900px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap">
+<div style="display:flex;flex-direction:column;gap:4px">
+<div style="font-size:20px;line-height:26px;font-weight:600">Backups &amp; recovery</div>
+<div style="font-size:13px;line-height:18px;color:var(--text-secondary)">Continuous WAL archiving with a daily base backup. Recovery is the only number that matters here, so it is the one on top.</div>
+</div>
+<span style="flex:1"></span>
+<button sc-camel-on-click="{{ backupNow }}" style="height:28px;padding:0 12px;border:1px solid var(--border-strong);border-radius:3px;font-size:13px;white-space:nowrap" style-hover="background:var(--bg-hover)">Base backup now</button>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px">
+<sc-for list="{{ backupKpis }}" as="k" hint-placeholder-count="4">
+<div style="{{ k.style }}">
+<span style="{{ k.valueStyle }}">{{ k.value }}</span>
+<span style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">{{ k.label }}</span>
+<span style="font-size:11px;line-height:15px;color:var(--text-muted)">{{ k.note }}</span>
+</div>
+</sc-for>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Point-in-time recovery window</div>
+<div style="padding:14px;border:1px solid var(--border-subtle);border-radius:3px;display:flex;flex-direction:column;gap:12px">
+<div style="position:relative;height:34px">
+<div style="position:absolute;left:0;right:0;top:14px;height:6px;background:var(--bg-inset);border-radius:3px"></div>
+<div style="{{ pitrFillStyle }}"></div>
+<div style="{{ pitrHandleStyle }}"></div>
+<sc-for list="{{ pitrMarks }}" as="m" hint-placeholder-count="5">
+<div style="{{ m.style }}" title="{{ m.title }}"></div>
+</sc-for>
+</div>
+<input type="range" min="0" max="100" value="{{ pitrPos }}" sc-camel-on-change="{{ onPitr }}" style="width:100%;accent-color:var(--text-primary)">
+<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+<span style="font-family:'IBM Plex Mono',monospace;font-size:13px">{{ pitrTime }}</span>
+<span style="font-size:12px;color:var(--text-secondary)">{{ pitrNote }}</span>
+<span style="flex:1"></span>
+<button sc-camel-on-click="{{ restorePreview }}" style="height:26px;padding:0 11px;border:1px solid var(--border-strong);border-radius:3px;font-size:12px;white-space:nowrap" style-hover="background:var(--bg-hover)">Restore to a scratch connection</button>
+<button sc-camel-on-click="{{ restoreInPlace }}" style="height:26px;padding:0 11px;border-radius:3px;background:var(--danger);color:var(--text-inverse);font-size:12px;font-weight:500;white-space:nowrap">Restore in place…</button>
+</div>
+</div>
+<div style="font-size:12px;line-height:17px;color:var(--text-muted)">Restoring in place replaces the live database and disconnects every session. Comb requires the connection name typed out, and records who did it in the trail.</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Backup history</div>
+<div style="border:1px solid var(--border-subtle);border-radius:3px;overflow:auto">
+<div style="{{ bkHeadStyle }}">
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle)">Taken</div>
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle)">Kind</div>
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle);text-align:right">Size</div>
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle);text-align:right">Duration</div>
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle)">Verified</div>
+<div style="padding:5px 10px">Destination</div>
+</div>
+<sc-for list="{{ backupRows }}" as="b" hint-placeholder-count="6">
+<div style="{{ b.style }}" style-hover="background:var(--bg-hover)">
+<div style="{{ b.cell }}">{{ b.when }}</div>
+<div style="display:flex;align-items:center;padding:0 10px;border-right:1px solid var(--border-subtle)"><span style="{{ b.kindStyle }}">{{ b.kind }}</span></div>
+<div style="{{ b.numCell }}">{{ b.size }}</div>
+<div style="{{ b.numCell }}">{{ b.dur }}</div>
+<div style="display:flex;align-items:center;gap:6px;padding:0 10px;border-right:1px solid var(--border-subtle)"><span style="{{ b.vStyle }}">{{ b.verified }}</span></div>
+<div style="display:flex;align-items:center;padding:0 10px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ b.dest }}</div>
+</div>
+</sc-for>
+</div>
+<div style="font-size:12px;line-height:17px;color:var(--text-muted)">A backup nobody restored is a rumour. Comb restores the newest base backup into a scratch instance nightly and reports whether it came up.</div>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isLibraryTab }}" hint-placeholder-val="{{ false }}">
+<div style="height:34px;flex:none;display:flex;align-items:center;gap:8px;padding:0 10px;border-bottom:1px solid var(--border-subtle);background:var(--bg-raised);overflow-x:auto">
+<div style="display:flex;align-items:center;gap:6px;height:22px;padding:0 8px;background:var(--bg-base);border:1px solid var(--border-subtle);border-radius:3px;width:200px;flex:none">
+<input value="{{ libQ }}" sc-camel-on-change="{{ onLibQ }}" placeholder="search the library" style="flex:1;font-family:'IBM Plex Mono',monospace;font-size:12px">
+</div>
+<div style="display:flex;align-items:stretch;border:1px solid var(--border-subtle);border-radius:3px;overflow:hidden;height:22px;flex:none">
+<sc-for list="{{ libSegs }}" as="s" hint-placeholder-count="3"><button sc-camel-on-click="{{ s.onClick }}" style="{{ s.style }}">{{ s.label }}</button></sc-for>
+</div>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-secondary);white-space:nowrap;flex:none">{{ libSummary }}</span>
+<span style="flex:1;min-width:8px"></span>
+<button sc-camel-on-click="{{ newSaved }}" style="height:22px;padding:0 10px;border-radius:3px;background:var(--btn-primary);color:var(--text-inverse);font-size:12px;font-weight:500;white-space:nowrap;flex:none">+ Save current query</button>
+</div>
+<div style="flex:1;min-height:0;display:flex">
+<div style="width:290px;flex:none;border-right:1px solid var(--border-subtle);background:var(--bg-raised);overflow:auto">
+<sc-for list="{{ libList }}" as="q" hint-placeholder-count="8">
+<div sc-camel-on-click="{{ q.onClick }}" style="{{ q.style }}" style-hover="background:var(--bg-hover)">
+<div style="display:flex;align-items:center;gap:7px;min-width:0">
+<span style="{{ q.iconStyle }}">{{ q.icon }}</span>
+<span style="font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ q.name }}</span>
+<span style="flex:1"></span>
+<sc-if value="{{ q.shared }}" hint-placeholder-val="{{ false }}"><span style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;color:var(--state-info)">SHARED</span></sc-if>
+</div>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ q.meta }}</span>
+</div>
+</sc-for>
+<sc-if value="{{ libEmpty }}" hint-placeholder-val="{{ false }}">
+<div style="padding:28px 16px;text-align:center;color:var(--text-muted);font-size:12px">No saved query matches.</div>
+</sc-if>
+</div>
+<div style="flex:1;min-width:0;overflow:auto">
+<div style="padding:16px 18px 50px;max-width:820px;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap">
+<div style="display:flex;flex-direction:column;gap:4px;min-width:0">
+<div style="font-size:18px;line-height:24px;font-weight:600">{{ lib.name }}</div>
+<div style="font-size:13px;line-height:18px;color:var(--text-secondary)">{{ lib.desc }}</div>
+</div>
+<span style="flex:1"></span>
+<div style="display:flex;gap:6px">
+<button sc-camel-on-click="{{ libOpen }}" style="height:26px;padding:0 11px;border-radius:3px;background:var(--btn-primary);color:var(--text-inverse);font-size:12px;font-weight:500;white-space:nowrap">Open in a tab</button>
+<button sc-camel-on-click="{{ libSchedule }}" style="height:26px;padding:0 11px;border:1px solid var(--border-strong);border-radius:3px;font-size:12px;white-space:nowrap" style-hover="background:var(--bg-hover)">Schedule…</button>
+</div>
+</div>
+<sc-if value="{{ libHasParams }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Parameters</div>
+<div style="display:flex;gap:10px;flex-wrap:wrap">
+<sc-for list="{{ libParams }}" as="p" hint-placeholder-count="2">
+<label style="display:flex;flex-direction:column;gap:4px;min-width:150px">
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-secondary)">{{ p.name }}</span>
+<input value="{{ p.value }}" sc-camel-on-change="{{ p.onChange }}" style="height:26px;padding:0 9px;background:var(--bg-raised);border:1px solid var(--border-strong);border-radius:3px;font-family:'IBM Plex Mono',monospace;font-size:12px">
+</label>
+</sc-for>
+</div>
+<div style="font-size:12px;color:var(--text-muted)">Parameters are bound, not interpolated — a saved query cannot be turned into a different statement by its inputs.</div>
+</div>
+</sc-if>
+<div style="border:1px solid var(--border-strong);border-radius:3px;background:var(--bg-inset);overflow:auto">
+<sc-for list="{{ libLines }}" as="l" hint-placeholder-count="8">
+<div style="display:flex;gap:12px;padding:0 12px">
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:19px;color:var(--text-muted);width:20px;text-align:right;flex:none;user-select:none">{{ l.n }}</span>
+<span style="{{ l.style }}">{{ l.text }}</span>
+</div>
+</sc-for>
+</div>
+<div style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start">
+<div style="flex:1;min-width:280px;display:flex;flex-direction:column;gap:8px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Versions</div>
+<div style="border:1px solid var(--border-subtle);border-radius:3px;overflow:hidden">
+<sc-for list="{{ libVersions }}" as="v" hint-placeholder-count="4">
+<div style="{{ v.style }}">
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;width:34px;flex:none;color:var(--text-muted)">{{ v.n }}</span>
+<span style="font-size:12px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ v.note }}</span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted);white-space:nowrap">{{ v.who }}</span>
+<button sc-camel-on-click="{{ v.onDiff }}" style="font-size:11px;color:var(--state-info);white-space:nowrap">diff</button>
+</div>
+</sc-for>
+</div>
+</div>
+<div style="flex:1;min-width:280px;display:flex;flex-direction:column;gap:8px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Sharing</div>
+<div style="border:1px solid var(--border-subtle);border-radius:3px;padding:10px;display:flex;flex-direction:column;gap:9px">
+<sc-for list="{{ libShare }}" as="s" hint-placeholder-count="3">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:14px">
+<div style="display:flex;flex-direction:column;gap:1px"><span style="font-size:13px;line-height:18px">{{ s.label }}</span><span style="font-size:11px;color:var(--text-muted)">{{ s.hint }}</span></div>
+<button sc-camel-on-click="{{ s.onClick }}" style="{{ s.trackStyle }}"><span style="{{ s.knobStyle }}"></span></button>
+</div>
+</sc-for>
+<div style="display:flex;align-items:center;gap:10px;padding-top:8px;border-top:1px solid var(--border-subtle)">
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-secondary);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ libRunStats }}</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isSecurityTab }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;min-height:0;overflow:auto">
+<div style="padding:18px 20px 50px;max-width:900px;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;gap:4px">
+<div style="font-size:20px;line-height:26px;font-weight:600">Security</div>
+<div style="font-size:13px;line-height:18px;color:var(--text-secondary)">Everything on this page narrows what a stolen credential can reach.</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;align-items:center;gap:10px">
+<span style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Workspace sessions</span>
+<span style="flex:1"></span>
+<button sc-camel-on-click="{{ revokeAll }}" style="height:22px;padding:0 9px;border:1px solid var(--border-strong);border-radius:3px;font-size:12px;color:var(--danger);white-space:nowrap" style-hover="background:color-mix(in oklab, var(--danger) 12%, transparent)">Revoke all others</button>
+</div>
+<div style="border:1px solid var(--border-subtle);border-radius:3px;overflow:hidden">
+<sc-for list="{{ sessionRows }}" as="s" hint-placeholder-count="4">
+<div style="{{ s.style }}">
+<span style="{{ s.dotStyle }}"></span>
+<div style="display:flex;flex-direction:column;gap:1px;flex:1;min-width:0">
+<span style="font-size:13px;line-height:18px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ s.device }}</span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ s.meta }}</span>
+</div>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-secondary);white-space:nowrap">{{ s.seen }}</span>
+<button sc-camel-on-click="{{ s.onRevoke }}" style="{{ s.btnStyle }}">{{ s.btnLabel }}</button>
+</div>
+</sc-for>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;align-items:center;gap:10px">
+<span style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">API tokens</span>
+<span style="flex:1"></span>
+<button sc-camel-on-click="{{ newToken }}" style="height:22px;padding:0 9px;border:1px solid var(--border-strong);border-radius:3px;font-size:12px;white-space:nowrap" style-hover="background:var(--bg-hover)">+ New token</button>
+</div>
+<div style="border:1px solid var(--border-subtle);border-radius:3px;overflow:auto">
+<div style="{{ tokHeadStyle }}">
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle)">Name</div>
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle)">Prefix</div>
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle)">Scopes</div>
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle)">Last used</div>
+<div style="padding:5px 10px">Expires</div>
+</div>
+<sc-for list="{{ tokenRows }}" as="t" hint-placeholder-count="4">
+<div style="{{ t.style }}" style-hover="background:var(--bg-hover)">
+<div style="display:flex;align-items:center;padding:0 10px;border-right:1px solid var(--border-subtle);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ t.name }}</div>
+<div style="display:flex;align-items:center;padding:0 10px;border-right:1px solid var(--border-subtle);font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-muted)">{{ t.prefix }}</div>
+<div style="display:flex;align-items:center;gap:4px;padding:0 8px;border-right:1px solid var(--border-subtle);overflow:hidden">
+<sc-for list="{{ t.scopes }}" as="sc" hint-placeholder-count="2"><span style="{{ sc.style }}">{{ sc.label }}</span></sc-for>
+</div>
+<div style="display:flex;align-items:center;padding:0 10px;border-right:1px solid var(--border-subtle);font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-secondary)">{{ t.used }}</div>
+<div style="display:flex;align-items:center;gap:8px;padding:0 10px">
+<span style="{{ t.expStyle }}">{{ t.expires }}</span>
+<span style="flex:1"></span>
+<button sc-camel-on-click="{{ t.onRevoke }}" style="font-size:11px;color:var(--text-muted);white-space:nowrap" style-hover="color:var(--danger)">revoke</button>
+</div>
+</div>
+</sc-for>
+</div>
+</div>
+<div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start">
+<div style="flex:1;min-width:300px;display:flex;flex-direction:column;gap:8px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">IP allowlist</div>
+<div style="border:1px solid var(--border-subtle);border-radius:3px;padding:10px;display:flex;flex-direction:column;gap:9px">
+<div style="display:flex;gap:6px;flex-wrap:wrap">
+<sc-for list="{{ ipRows }}" as="i" hint-placeholder-count="3">
+<span style="display:flex;align-items:center;gap:7px;height:24px;padding:0 8px;border:1px solid var(--border-subtle);border-radius:3px;font-family:'IBM Plex Mono',monospace;font-size:12px">{{ i.cidr }}<span style="font-size:11px;color:var(--text-muted)">{{ i.note }}</span><button sc-camel-on-click="{{ i.onRemove }}" style="font-size:11px;color:var(--text-muted)" style-hover="color:var(--danger)">✕</button></span>
+</sc-for>
+</div>
+<div style="display:flex;gap:6px">
+<input value="{{ newIp }}" sc-camel-on-change="{{ onNewIp }}" sc-camel-on-key-down="{{ onNewIpKey }}" placeholder="10.0.0.0/8" style="flex:1;height:26px;padding:0 9px;background:var(--bg-raised);border:1px solid var(--border-strong);border-radius:3px;font-family:'IBM Plex Mono',monospace;font-size:12px">
+<button sc-camel-on-click="{{ addIp }}" style="height:26px;padding:0 10px;border:1px solid var(--border-strong);border-radius:3px;font-size:12px">Add</button>
+</div>
+<div style="{{ ipWarnStyle }}">{{ ipWarn }}</div>
+</div>
+</div>
+<div style="flex:1;min-width:300px;display:flex;flex-direction:column;gap:8px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Policy</div>
+<div style="border:1px solid var(--border-subtle);border-radius:3px;padding:10px;display:flex;flex-direction:column;gap:11px">
+<sc-for list="{{ secPolicies }}" as="p" hint-placeholder-count="5">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:14px">
+<div style="display:flex;flex-direction:column;gap:1px"><span style="font-size:13px;line-height:18px">{{ p.label }}</span><span style="font-size:11px;color:var(--text-muted)">{{ p.hint }}</span></div>
+<button sc-camel-on-click="{{ p.onClick }}" style="{{ p.trackStyle }}"><span style="{{ p.knobStyle }}"></span></button>
+</div>
+</sc-for>
+<div style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding-top:9px;border-top:1px solid var(--border-subtle)">
+<div style="display:flex;flex-direction:column;gap:1px"><span style="font-size:13px;line-height:18px">Idle session timeout</span><span style="font-size:11px;color:var(--text-muted)">{{ idleNote }}</span></div>
+<div style="display:flex;border:1px solid var(--border-subtle);border-radius:3px;overflow:hidden;height:24px;flex:none">
+<sc-for list="{{ idleSegs }}" as="s" hint-placeholder-count="4"><button sc-camel-on-click="{{ s.onClick }}" style="{{ s.style }}">{{ s.label }}</button></sc-for>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isIntegrationsTab }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;min-height:0;overflow:auto">
+<div style="padding:18px 20px 50px;max-width:900px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:4px">
+<div style="font-size:20px;line-height:26px;font-weight:600">Integrations</div>
+<div style="font-size:13px;line-height:18px;color:var(--text-secondary)">Comb pushes events out. It does not let anything reach in and run SQL.</div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(268px,1fr));gap:10px">
+<sc-for list="{{ integrations }}" as="i" hint-placeholder-count="6">
+<div style="{{ i.style }}">
+<div style="display:flex;align-items:center;gap:9px">
+<span style="{{ i.markStyle }}">{{ i.mark }}</span>
+<div style="display:flex;flex-direction:column;gap:1px;min-width:0">
+<span style="font-size:13px;line-height:18px;font-weight:500">{{ i.name }}</span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ i.target }}</span>
+</div>
+<span style="flex:1"></span>
+<button sc-camel-on-click="{{ i.onToggle }}" style="{{ i.trackStyle }}"><span style="{{ i.knobStyle }}"></span></button>
+</div>
+<div style="font-size:12px;line-height:17px;color:var(--text-secondary)">{{ i.desc }}</div>
+<div style="display:flex;align-items:center;gap:8px">
+<span style="{{ i.stateStyle }}">{{ i.state }}</span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted)">{{ i.last }}</span>
+<span style="flex:1"></span>
+<button sc-camel-on-click="{{ i.onTest }}" style="font-size:11px;color:var(--state-info);white-space:nowrap">test</button>
+</div>
+</div>
+</sc-for>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Event subscriptions</div>
+<div style="border:1px solid var(--border-subtle);border-radius:3px;overflow:auto">
+<div style="{{ evHeadStyle }}">
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle)">Event</div>
+<sc-for list="{{ evCols }}" as="c" hint-placeholder-count="4"><div style="padding:5px 8px;border-right:1px solid var(--border-subtle);text-align:center">{{ c }}</div></sc-for>
+</div>
+<sc-for list="{{ evRows }}" as="r" hint-placeholder-count="6">
+<div style="{{ r.style }}" style-hover="background:var(--bg-hover)">
+<div style="display:flex;align-items:center;padding:0 10px;border-right:1px solid var(--border-subtle);font-family:'IBM Plex Mono',monospace;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.event }}</div>
+<sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="4">
+<div sc-camel-on-click="{{ c.onClick }}" style="{{ c.style }}"><span style="{{ c.markStyle }}">{{ c.mark }}</span></div>
+</sc-for>
+</div>
+</sc-for>
+</div>
+<div style="font-size:12px;line-height:17px;color:var(--text-muted)">Payloads carry ids and counts, never row values — a Slack channel is not a place for customer data.</div>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isComplianceTab }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;min-height:0;overflow:auto">
+<div style="padding:18px 20px 50px;max-width:920px;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap">
+<div style="display:flex;flex-direction:column;gap:4px">
+<div style="font-size:20px;line-height:26px;font-weight:600">Compliance</div>
+<div style="font-size:13px;line-height:18px;color:var(--text-secondary)">Evidence is generated from what actually happened, not from a checklist someone ticked.</div>
+</div>
+<span style="flex:1"></span>
+<button sc-camel-on-click="{{ exportEvidence }}" style="height:28px;padding:0 12px;border:1px solid var(--border-strong);border-radius:3px;font-size:13px;white-space:nowrap" style-hover="background:var(--bg-hover)">⤓ Evidence pack</button>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Controls</div>
+<div style="border:1px solid var(--border-subtle);border-radius:3px;overflow:auto">
+<div style="{{ ctrlHeadStyle }}">
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle)">Control</div>
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle)">Framework</div>
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle)">Evidence</div>
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle)">Checked</div>
+<div style="padding:5px 10px">State</div>
+</div>
+<sc-for list="{{ controlRows }}" as="c" hint-placeholder-count="7">
+<div style="{{ c.style }}" style-hover="background:var(--bg-hover)">
+<div style="display:flex;align-items:center;padding:0 10px;border-right:1px solid var(--border-subtle);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ c.name }}</div>
+<div style="display:flex;align-items:center;padding:0 10px;border-right:1px solid var(--border-subtle);font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted);white-space:nowrap">{{ c.fw }}</div>
+<div style="display:flex;align-items:center;padding:0 10px;border-right:1px solid var(--border-subtle);font-size:12px;color:var(--text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ c.evidence }}</div>
+<div style="display:flex;align-items:center;padding:0 10px;border-right:1px solid var(--border-subtle);font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-muted);white-space:nowrap">{{ c.when }}</div>
+<div style="display:flex;align-items:center;gap:8px;padding:0 10px">
+<span style="{{ c.stateStyle }}">{{ c.state }}</span>
+<span style="flex:1"></span>
+<sc-if value="{{ c.fixable }}" hint-placeholder-val="{{ false }}">
+<button sc-camel-on-click="{{ c.onFix }}" style="font-size:11px;color:var(--state-info);white-space:nowrap">fix</button>
+</sc-if>
+</div>
+</div>
+</sc-for>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;align-items:center;gap:10px">
+<span style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Data subject requests</span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-secondary)">{{ dsrSummary }}</span>
+<span style="flex:1"></span>
+<button sc-camel-on-click="{{ newDsr }}" style="height:22px;padding:0 9px;border:1px solid var(--border-strong);border-radius:3px;font-size:12px;white-space:nowrap" style-hover="background:var(--bg-hover)">+ New request</button>
+</div>
+<div style="border:1px solid var(--border-subtle);border-radius:3px;overflow:hidden">
+<sc-for list="{{ dsrRows }}" as="d" hint-placeholder-count="4">
+<div sc-camel-on-click="{{ d.onClick }}" style="{{ d.style }}" style-hover="background:var(--bg-hover)">
+<span style="{{ d.kindStyle }}">{{ d.kind }}</span>
+<div style="display:flex;flex-direction:column;gap:1px;flex:1;min-width:0">
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ d.subject }}</span>
+<span style="font-size:11px;color:var(--text-muted)">{{ d.scope }}</span>
+</div>
+<span style="{{ d.dueStyle }}">{{ d.due }}</span>
+<span style="{{ d.stateStyle }}">{{ d.state }}</span>
+<button sc-camel-on-click="{{ d.onRun }}" style="{{ d.btnStyle }}">{{ d.btnLabel }}</button>
+</div>
+</sc-for>
+</div>
+<sc-if value="{{ dsrSel }}" hint-placeholder-val="{{ true }}">
+<div style="border:1px solid var(--border-strong);border-radius:3px;background:var(--bg-inset);padding:10px 12px;display:flex;flex-direction:column;gap:8px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Reach for {{ dsr.subject }} — built from the catalog, not guessed</div>
+<pre style="margin:0;font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:19px;white-space:pre-wrap">{{ dsr.plan }}</pre>
+</div>
+</sc-if>
+</div>
+<div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start">
+<div style="flex:1;min-width:300px;display:flex;flex-direction:column;gap:8px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Retention policies</div>
+<div style="border:1px solid var(--border-subtle);border-radius:3px;overflow:hidden">
+<sc-for list="{{ retentionRows }}" as="r" hint-placeholder-count="4">
+<div style="{{ r.style }}">
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.target }}</span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-secondary);white-space:nowrap">{{ r.keep }}</span>
+<span style="{{ r.stateStyle }}">{{ r.state }}</span>
+</div>
+</sc-for>
+</div>
+</div>
+<div style="flex:1;min-width:300px;display:flex;flex-direction:column;gap:8px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Residency &amp; processors</div>
+<div style="border:1px solid var(--border-subtle);border-radius:3px;padding:11px;display:flex;flex-direction:column;gap:9px">
+<sc-for list="{{ residencyRows }}" as="r" hint-placeholder-count="4">
+<div style="display:flex;align-items:baseline;gap:10px">
+<span style="font-size:12px;color:var(--text-secondary);width:96px;flex:none">{{ r.label }}</span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;flex:1;min-width:0">{{ r.value }}</span>
+</div>
+</sc-for>
+<div style="font-size:12px;line-height:17px;color:var(--text-muted);padding-top:8px;border-top:1px solid var(--border-subtle)">Turning on the AI panel adds one processor. That is the only case where data leaves your infrastructure, and it is off until you set a key.</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isUsageTab }}" hint-placeholder-val="{{ false }}">
+<div style="height:34px;flex:none;display:flex;align-items:center;gap:10px;padding:0 10px;border-bottom:1px solid var(--border-subtle);background:var(--bg-raised);overflow-x:auto">
+<div style="display:flex;align-items:stretch;border:1px solid var(--border-subtle);border-radius:3px;overflow:hidden;height:22px;flex:none">
+<sc-for list="{{ usageSegs }}" as="s" hint-placeholder-count="3"><button sc-camel-on-click="{{ s.onClick }}" style="{{ s.style }}">{{ s.label }}</button></sc-for>
+</div>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-secondary);white-space:nowrap;flex:none">{{ usageSummary }}</span>
+<span style="flex:1;min-width:8px"></span>
+<button sc-camel-on-click="{{ exportUsage }}" style="height:22px;padding:0 9px;border:1px solid var(--border-strong);border-radius:3px;font-size:12px;white-space:nowrap;flex:none" style-hover="background:var(--bg-hover)">⤓ Chargeback CSV</button>
+</div>
+<div style="flex:1;min-height:0;overflow:auto">
+<div style="padding:14px;display:flex;flex-direction:column;gap:18px">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px">
+<sc-for list="{{ usageKpis }}" as="k" hint-placeholder-count="4">
+<div style="display:flex;flex-direction:column;gap:5px;padding:10px 11px;border:1px solid var(--border-subtle);border-radius:3px;background:var(--bg-raised)">
+<div style="display:flex;align-items:baseline;gap:6px">
+<span style="font-family:'IBM Plex Mono',monospace;font-size:22px;line-height:28px;font-weight:500">{{ k.value }}</span>
+<span style="{{ k.deltaStyle }}">{{ k.delta }}</span>
+</div>
+<span style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">{{ k.label }}</span>
+</div>
+</sc-for>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Query time by team</div>
+<div style="border:1px solid var(--border-subtle);border-radius:3px;padding:12px;display:flex;flex-direction:column;gap:10px">
+<sc-for list="{{ teamUsage }}" as="t" hint-placeholder-count="5">
+<div style="display:flex;align-items:center;gap:10px">
+<span style="font-size:12px;width:110px;flex:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ t.team }}</span>
+<div style="flex:1;min-width:80px;height:14px;background:var(--bg-inset);border-radius:2px;overflow:hidden;display:flex">
+<sc-for list="{{ t.segs }}" as="g" hint-placeholder-count="3"><span style="{{ g.style }}" title="{{ g.title }}"></span></sc-for>
+</div>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-secondary);width:74px;flex:none;text-align:right">{{ t.hours }}</span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;width:74px;flex:none;text-align:right">{{ t.cost }}</span>
+</div>
+</sc-for>
+<div style="display:flex;gap:14px;flex-wrap:wrap;padding-top:9px;border-top:1px solid var(--border-subtle)">
+<sc-for list="{{ usageLegend }}" as="l" hint-placeholder-count="3">
+<span style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-muted)"><span style="{{ l.style }}"></span>{{ l.label }}</span>
+</sc-for>
+</div>
+</div>
+</div>
+<div style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start">
+<div style="flex:1;min-width:330px;display:flex;flex-direction:column;gap:8px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Most expensive queries this month</div>
+<div style="border:1px solid var(--border-subtle);border-radius:3px;overflow:hidden">
+<sc-for list="{{ costRows }}" as="c" hint-placeholder-count="5">
+<div style="{{ c.style }}">
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ c.name }}</span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted);white-space:nowrap">{{ c.who }}</span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;width:66px;flex:none;text-align:right">{{ c.cost }}</span>
+</div>
+</sc-for>
+</div>
+<div style="font-size:12px;line-height:17px;color:var(--text-muted)">Cost is compute seconds × your instance rate. It is an attribution, not an invoice.</div>
+</div>
+<div style="flex:1;min-width:330px;display:flex;flex-direction:column;gap:8px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Where the money goes</div>
+<div style="border:1px solid var(--border-subtle);border-radius:3px;padding:11px;display:flex;flex-direction:column;gap:9px">
+<sc-for list="{{ savings }}" as="s" hint-placeholder-count="3">
+<div style="display:flex;align-items:flex-start;gap:9px">
+<span style="{{ s.markStyle }}">{{ s.mark }}</span>
+<div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0">
+<span style="font-size:13px;line-height:18px">{{ s.title }}</span>
+<span style="font-size:12px;line-height:17px;color:var(--text-secondary)">{{ s.body }}</span>
+</div>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--state-success);white-space:nowrap">{{ s.saving }}</span>
+</div>
+</sc-for>
+</div>
+</div>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isTopologyTab }}" hint-placeholder-val="{{ false }}">
+<div style="height:34px;flex:none;display:flex;align-items:center;gap:10px;padding:0 10px;border-bottom:1px solid var(--border-subtle);background:var(--bg-raised);overflow-x:auto">
+<span style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);white-space:nowrap;flex:none">Cluster</span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-secondary);white-space:nowrap;flex:none">{{ topoSummary }}</span>
+<span style="flex:1;min-width:8px"></span>
+<button sc-camel-on-click="{{ failover }}" style="height:22px;padding:0 9px;border:1px solid var(--border-strong);border-radius:3px;font-size:12px;color:var(--state-running);white-space:nowrap;flex:none" style-hover="background:var(--bg-hover)">Planned switchover…</button>
+</div>
+<div style="flex:1;min-height:0;overflow:auto">
+<div style="padding:16px;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:stretch">
+<sc-for list="{{ nodes }}" as="n" hint-placeholder-count="4">
+<div style="{{ n.style }}">
+<div style="display:flex;align-items:center;gap:8px">
+<span style="{{ n.roleStyle }}">{{ n.role }}</span>
+<span style="flex:1"></span>
+<span style="{{ n.dotStyle }}"></span>
+</div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:500">{{ n.host }}</div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted)">{{ n.region }} · {{ n.version }}</div>
+<div style="display:grid;grid-template-columns:auto 1fr;gap:3px 10px;align-items:baseline">
+<sc-for list="{{ n.stats }}" as="s" hint-placeholder-count="4">
+<span style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);white-space:nowrap">{{ s.k }}</span>
+<span style="{{ s.style }}">{{ s.v }}</span>
+</sc-for>
+</div>
+<div style="display:flex;align-items:flex-end;gap:2px;height:20px">
+<sc-for list="{{ n.bars }}" as="b" hint-placeholder-count="12"><span style="{{ b.style }}"></span></sc-for>
+</div>
+</div>
+</sc-for>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Replication</div>
+<div style="border:1px solid var(--border-subtle);border-radius:3px;overflow:auto">
+<div style="{{ replHeadStyle }}">
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle)">Replica</div>
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle)">Mode</div>
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle);text-align:right">Write lag</div>
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle);text-align:right">Apply lag</div>
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle)">Slot</div>
+<div style="padding:5px 10px">Routed traffic</div>
+</div>
+<sc-for list="{{ replRows }}" as="r" hint-placeholder-count="3">
+<div style="{{ r.style }}" style-hover="background:var(--bg-hover)">
+<div style="{{ r.cell }}">{{ r.name }}</div>
+<div style="display:flex;align-items:center;padding:0 10px;border-right:1px solid var(--border-subtle)"><span style="{{ r.modeStyle }}">{{ r.mode }}</span></div>
+<div style="{{ r.numCell }}">{{ r.wlag }}</div>
+<div style="{{ r.applyCell }}">{{ r.alag }}</div>
+<div style="{{ r.cell }}">{{ r.slot }}</div>
+<div style="display:flex;align-items:center;gap:8px;padding:0 10px">
+<div style="flex:1;min-width:50px;height:6px;background:var(--bg-inset);border-radius:3px;overflow:hidden"><span style="{{ r.fillStyle }}"></span></div>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted);white-space:nowrap">{{ r.share }}</span>
+</div>
+</div>
+</sc-for>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Failover history</div>
+<div style="border:1px solid var(--border-subtle);border-radius:3px;overflow:hidden">
+<sc-for list="{{ failoverRows }}" as="f" hint-placeholder-count="3">
+<div style="{{ f.style }}">
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;width:112px;flex:none;color:var(--text-muted)">{{ f.when }}</span>
+<span style="{{ f.kindStyle }}">{{ f.kind }}</span>
+<span style="font-size:12px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ f.text }}</span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted);white-space:nowrap">{{ f.downtime }}</span>
+</div>
+</sc-for>
+</div>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isQualityTab }}" hint-placeholder-val="{{ false }}">
+<div style="height:34px;flex:none;display:flex;align-items:center;gap:8px;padding:0 10px;border-bottom:1px solid var(--border-subtle);background:var(--bg-raised);overflow-x:auto">
+<div style="display:flex;align-items:stretch;border:1px solid var(--border-subtle);border-radius:3px;overflow:hidden;height:22px;flex:none">
+<sc-for list="{{ dqSegs }}" as="s" hint-placeholder-count="3"><button sc-camel-on-click="{{ s.onClick }}" style="{{ s.style }}">{{ s.label }}</button></sc-for>
+</div>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-secondary);white-space:nowrap;flex:none">{{ dqSummary }}</span>
+<span style="flex:1;min-width:8px"></span>
+<button sc-camel-on-click="{{ runTests }}" style="{{ dqRunStyle }}">{{ dqRunLabel }}</button>
+<button sc-camel-on-click="{{ newTest }}" style="height:22px;padding:0 9px;border:1px solid var(--border-strong);border-radius:3px;font-size:12px;white-space:nowrap;flex:none" style-hover="background:var(--bg-hover)">+ New test</button>
+</div>
+<div style="flex:1;min-height:0;display:flex">
+<div style="flex:1;min-width:0;overflow:auto">
+<div style="{{ dqHeadStyle }}">
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle)">Test</div>
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle)">Target</div>
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle)">Kind</div>
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle);text-align:right">Failing</div>
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle)">Last 10</div>
+<div style="padding:5px 10px">State</div>
+</div>
+<sc-for list="{{ dqRows }}" as="t" hint-placeholder-count="8">
+<div sc-camel-on-click="{{ t.onClick }}" style="{{ t.style }}" style-hover="background:var(--bg-hover)">
+<div style="display:flex;align-items:center;padding:0 10px;border-right:1px solid var(--border-subtle);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ t.name }}</div>
+<div style="display:flex;align-items:center;padding:0 10px;border-right:1px solid var(--border-subtle);font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ t.target }}</div>
+<div style="display:flex;align-items:center;padding:0 10px;border-right:1px solid var(--border-subtle)"><span style="{{ t.kindStyle }}">{{ t.kind }}</span></div>
+<div style="{{ t.numCell }}">{{ t.failing }}</div>
+<div style="display:flex;align-items:center;gap:2px;padding:0 10px;border-right:1px solid var(--border-subtle)">
+<sc-for list="{{ t.runs }}" as="r" hint-placeholder-count="10"><span style="{{ r.style }}" title="{{ r.title }}"></span></sc-for>
+</div>
+<div style="display:flex;align-items:center;gap:8px;padding:0 10px">
+<span style="{{ t.stateStyle }}">{{ t.state }}</span>
+<span style="flex:1"></span>
+<button sc-camel-on-click="{{ t.onMute }}" style="font-size:11px;color:var(--text-muted);white-space:nowrap" style-hover="color:var(--text-primary)">{{ t.muteLabel }}</button>
+</div>
+</div>
+</sc-for>
+</div>
+<sc-if value="{{ dqSel }}" hint-placeholder-val="{{ true }}">
+<div style="width:370px;flex:none;background:var(--bg-raised);border-left:1px solid var(--border-subtle);display:flex;flex-direction:column;min-height:0">
+<div style="height:30px;flex:none;display:flex;align-items:center;gap:8px;padding:0 10px;border-bottom:1px solid var(--border-subtle)">
+<span style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ dq.name }}</span>
+<span style="flex:1"></span>
+<button sc-camel-on-click="{{ closeDq }}" style="color:var(--text-muted);font-size:12px" style-hover="color:var(--text-primary)">✕</button>
+</div>
+<div style="flex:1;min-height:0;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:14px">
+<div style="border:1px solid var(--border-strong);border-radius:3px;background:var(--bg-inset);padding:9px 10px">
+<pre style="margin:0;font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:18px;white-space:pre-wrap">{{ dq.sql }}</pre>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Rule</div>
+<div style="display:flex;align-items:center;gap:10px">
+<span style="font-size:12px;color:var(--text-secondary)">Fails when</span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;padding:2px 7px;border:1px solid var(--border-strong);border-radius:3px">{{ dq.rule }}</span>
+</div>
+</div>
+<sc-if value="{{ dqHasFailures }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:6px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Offending rows · first 4 of {{ dq.failing }}</div>
+<div style="border:1px solid var(--border-subtle);border-radius:3px;overflow:hidden">
+<sc-for list="{{ dqFailures }}" as="r" hint-placeholder-count="4">
+<div style="{{ r.style }}">
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.text }}</span>
+</div>
+</sc-for>
+</div>
+<button sc-camel-on-click="{{ dqOpenRows }}" style="align-self:flex-start;height:24px;padding:0 9px;border:1px solid var(--border-strong);border-radius:3px;font-size:12px" style-hover="background:var(--bg-hover)">Open all in a query tab</button>
+</div>
+</sc-if>
+<div style="display:flex;flex-direction:column;gap:9px;padding:10px;border:1px solid var(--border-subtle);border-radius:3px">
+<sc-for list="{{ dqOpts }}" as="o" hint-placeholder-count="3">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:14px">
+<div style="display:flex;flex-direction:column;gap:1px"><span style="font-size:13px;line-height:18px">{{ o.label }}</span><span style="font-size:11px;color:var(--text-muted)">{{ o.hint }}</span></div>
+<button sc-camel-on-click="{{ o.onClick }}" style="{{ o.trackStyle }}"><span style="{{ o.knobStyle }}"></span></button>
+</div>
+</sc-for>
+</div>
+</div>
+</div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ isDeployTab }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;min-height:0;overflow:auto">
+<div style="padding:18px 20px 50px;max-width:900px;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap">
+<div style="display:flex;flex-direction:column;gap:4px">
+<div style="font-size:20px;line-height:26px;font-weight:600">Deployment</div>
+<div style="font-size:13px;line-height:18px;color:var(--text-secondary)">This Comb runs in your infrastructure. Nothing here phones home except the license check, and that can be offline.</div>
+</div>
+<span style="flex:1"></span>
+<sc-if value="{{ updateReady }}" hint-placeholder-val="{{ true }}">
+<button sc-camel-on-click="{{ upgrade }}" style="height:28px;padding:0 12px;border-radius:3px;background:var(--btn-primary);color:var(--text-inverse);font-size:13px;font-weight:500;white-space:nowrap">Upgrade to {{ latestVersion }}</button>
+</sc-if>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:10px">
+<sc-for list="{{ deployKpis }}" as="k" hint-placeholder-count="4">
+<div style="{{ k.style }}">
+<span style="{{ k.valueStyle }}">{{ k.value }}</span>
+<span style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">{{ k.label }}</span>
+<span style="font-size:11px;line-height:15px;color:var(--text-muted)">{{ k.note }}</span>
+</div>
+</sc-for>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Services</div>
+<div style="border:1px solid var(--border-subtle);border-radius:3px;overflow:auto">
+<div style="{{ svcHeadStyle }}">
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle)">Service</div>
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle)">Version</div>
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle);text-align:right">Replicas</div>
+<div style="padding:5px 10px;border-right:1px solid var(--border-subtle)">Load</div>
+<div style="padding:5px 10px">State</div>
+</div>
+<sc-for list="{{ svcRows }}" as="s" hint-placeholder-count="5">
+<div style="{{ s.style }}" style-hover="background:var(--bg-hover)">
+<div style="display:flex;flex-direction:column;justify-content:center;padding:0 10px;border-right:1px solid var(--border-subtle);overflow:hidden">
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ s.name }}</span>
+<span style="font-size:11px;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ s.role }}</span>
+</div>
+<div style="display:flex;align-items:center;padding:0 10px;border-right:1px solid var(--border-subtle);font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-secondary)">{{ s.version }}</div>
+<div style="{{ s.numCell }}">{{ s.replicas }}</div>
+<div style="display:flex;align-items:center;gap:8px;padding:0 10px;border-right:1px solid var(--border-subtle)">
+<div style="flex:1;min-width:40px;height:6px;background:var(--bg-inset);border-radius:3px;overflow:hidden"><span style="{{ s.fillStyle }}"></span></div>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted);white-space:nowrap">{{ s.load }}</span>
+</div>
+<div style="display:flex;align-items:center;gap:8px;padding:0 10px">
+<span style="{{ s.stateStyle }}">{{ s.state }}</span>
+<span style="flex:1"></span>
+<button sc-camel-on-click="{{ s.onLogs }}" style="font-size:11px;color:var(--state-info);white-space:nowrap">logs</button>
+</div>
+</div>
+</sc-for>
+</div>
+</div>
+<div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start">
+<div style="flex:1;min-width:300px;display:flex;flex-direction:column;gap:8px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">License</div>
+<div style="border:1px solid var(--border-subtle);border-radius:3px;padding:12px;display:flex;flex-direction:column;gap:11px">
+<div style="display:flex;align-items:center;gap:10px">
+<span style="{{ licStyle }}">{{ licTier }}</span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-secondary)">{{ licKey }}</span>
+</div>
+<div style="display:flex;flex-direction:column;gap:5px">
+<div style="display:flex;align-items:baseline;justify-content:space-between">
+<span style="font-size:13px;line-height:18px">Seats</span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-secondary)">{{ seatLabel }}</span>
+</div>
+<div style="height:8px;background:var(--bg-inset);border-radius:4px;overflow:hidden"><span style="{{ seatFillStyle }}"></span></div>
+<span style="{{ seatNoteStyle }}">{{ seatNote }}</span>
+</div>
+<div style="display:grid;grid-template-columns:auto 1fr;gap:5px 12px;align-items:baseline;padding-top:9px;border-top:1px solid var(--border-subtle)">
+<sc-for list="{{ licFacts }}" as="l" hint-placeholder-count="4">
+<span style="font-size:12px;color:var(--text-secondary);white-space:nowrap">{{ l.k }}</span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px">{{ l.v }}</span>
+</sc-for>
+</div>
+</div>
+</div>
+<div style="flex:1;min-width:300px;display:flex;flex-direction:column;gap:8px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Feature flags</div>
+<div style="border:1px solid var(--border-subtle);border-radius:3px;padding:11px;display:flex;flex-direction:column;gap:11px">
+<sc-for list="{{ flags }}" as="fl" hint-placeholder-count="5">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:14px">
+<div style="display:flex;flex-direction:column;gap:1px;min-width:0">
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px">{{ fl.key }}</span>
+<span style="font-size:11px;color:var(--text-muted)">{{ fl.hint }}</span>
+</div>
+<button sc-camel-on-click="{{ fl.onClick }}" style="{{ fl.trackStyle }}"><span style="{{ fl.knobStyle }}"></span></button>
+</div>
+</sc-for>
+</div>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Release history</div>
+<div style="border:1px solid var(--border-subtle);border-radius:3px;overflow:hidden">
+<sc-for list="{{ releaseRows }}" as="r" hint-placeholder-count="4">
+<div style="{{ r.style }}">
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;width:66px;flex:none">{{ r.v }}</span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted);width:88px;flex:none">{{ r.when }}</span>
+<span style="font-size:12px;flex:1;min-width:0">{{ r.note }}</span>
+<span style="{{ r.tagStyle }}">{{ r.tag }}</span>
+</div>
+</sc-for>
+</div>
+</div>
+</div>
+</div>
+</sc-if>
+
+</div>
+</div>
+
+<sc-if value="{{ aiOpen }}" hint-placeholder-val="{{ true }}">
+<div style="width:372px;flex:none;background:var(--bg-raised);border-left:1px solid var(--border-subtle);display:flex;flex-direction:column;min-height:0">
+<div style="height:30px;flex:none;display:flex;align-items:center;gap:8px;padding:0 10px;border-bottom:1px solid var(--border-subtle)">
+<span style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase">AI</span>
+<span style="flex:1"></span>
+<button sc-camel-on-click="{{ clearAI }}" style="color:var(--text-muted);font-size:13px" style-hover="color:var(--text-primary)">⋯</button>
+<button sc-camel-on-click="{{ toggleAI }}" style="color:var(--text-muted);font-size:12px" style-hover="color:var(--text-primary)">✕</button>
+</div>
+<div style="flex:none;padding:8px 10px;border-bottom:1px solid var(--border-subtle);display:flex;flex-direction:column;gap:6px">
+<div style="font-size:11px;color:var(--text-muted)">Context: <span style="font-family:'IBM Plex Mono',monospace;color:var(--text-secondary)">public · 42 tables</span></div>
+<div style="display:flex;align-items:center;gap:6px">
+<div style="display:flex;border:1px solid var(--border-subtle);border-radius:3px;overflow:hidden;height:22px;flex:1">
+<sc-for list="{{ aiCtxSegs }}" as="s" hint-placeholder-count="3"><button sc-camel-on-click="{{ s.onClick }}" style="{{ s.style }}">{{ s.label }}</button></sc-for>
+</div>
+<span title="Nothing else is sent." style="color:var(--text-muted);font-size:12px">ⓘ</span>
+</div>
+<sc-if value="{{ ctxSamples }}" hint-placeholder-val="{{ false }}">
+<div style="font-size:11px;line-height:15px;color:var(--state-running)">5 rows per table will be sent, redacted on password/token/secret columns.</div>
+</sc-if>
+</div>
+<div style="flex:1;min-height:0;overflow:auto;padding:12px 10px;display:flex;flex-direction:column;gap:16px">
+<sc-if value="{{ aiEmpty }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:10px">
+<div style="font-size:14px;line-height:20px;color:var(--text-secondary)">Ask about <span style="font-family:'IBM Plex Mono',monospace;color:var(--text-primary)">public</span>. Answers arrive as SQL you can insert — nothing runs on its own.</div>
+<sc-for list="{{ aiExamples }}" as="e" hint-placeholder-count="3">
+<button sc-camel-on-click="{{ e.onClick }}" style="text-align:left;padding:7px 9px;border:1px solid var(--border-subtle);border-radius:3px;font-size:13px;line-height:18px;color:var(--text-secondary)" style-hover="border-color:var(--border-strong);color:var(--text-primary)">{{ e.text }}</button>
+</sc-for>
+</div>
+</sc-if>
+<sc-for list="{{ aiMsgs }}" as="m" hint-placeholder-count="2">
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">{{ m.who }}</div>
+<sc-if value="{{ m.isUser }}" hint-placeholder-val="{{ false }}">
+<div style="font-size:14px;line-height:20px;color:var(--text-primary)">{{ m.text }}</div>
+</sc-if>
+<sc-if value="{{ m.hasSql }}" hint-placeholder-val="{{ false }}">
+<div style="border:1px solid var(--border-strong);border-radius:3px;background:var(--bg-inset);padding:8px 10px;overflow:auto">
+<pre style="margin:0;font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:18px;white-space:pre">{{ m.sql }}</pre>
+</div>
+</sc-if>
+<sc-if value="{{ m.showActions }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;gap:6px;flex-wrap:wrap">
+<button sc-camel-on-click="{{ m.onInsert }}" style="height:22px;padding:0 8px;border:1px solid var(--border-strong);border-radius:3px;font-size:12px" style-hover="background:var(--bg-hover)">Insert at cursor</button>
+<button sc-camel-on-click="{{ m.onReplace }}" style="height:22px;padding:0 8px;border:1px solid var(--border-strong);border-radius:3px;font-size:12px" style-hover="background:var(--bg-hover)">Replace editor</button>
+<button sc-camel-on-click="{{ m.onCopy }}" style="height:22px;padding:0 8px;border:1px solid var(--border-strong);border-radius:3px;font-size:12px" style-hover="background:var(--bg-hover)">Copy</button>
+</div>
+</sc-if>
+<sc-if value="{{ m.hasProse }}" hint-placeholder-val="{{ false }}">
+<div style="font-size:14px;line-height:20px;color:var(--text-secondary)">{{ m.prose }}</div>
+</sc-if>
+<sc-if value="{{ m.streaming }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--state-running)"><span style="width:6px;height:6px;border-radius:50%;background:var(--state-running);animation:combpulse 1.6s ease-in-out infinite"></span> streaming…</div>
+</sc-if>
+</div>
+</sc-for>
+<sc-if value="{{ aiNoKey }}" hint-placeholder-val="{{ false }}">
+<div style="border:1px solid var(--border-strong);border-left:3px solid var(--state-error);border-radius:3px;padding:10px;display:flex;flex-direction:column;gap:6px">
+<div style="font-size:13px;line-height:18px;font-weight:500">No API key configured</div>
+<div style="font-size:13px;line-height:18px;color:var(--text-secondary)">Add one in Settings → AI. Nothing is sent until you do.</div>
+<button sc-camel-on-click="{{ openSettings }}" style="align-self:flex-start;height:22px;padding:0 8px;border:1px solid var(--border-strong);border-radius:3px;font-size:12px">Open Settings</button>
+</div>
+</sc-if>
+</div>
+<div style="flex:none;padding:8px 10px;border-top:1px solid var(--border-subtle);display:flex;flex-direction:column;gap:6px">
+<div style="display:flex;gap:6px;flex-wrap:wrap">
+<sc-for list="{{ aiChips }}" as="c" hint-placeholder-count="2">
+<button sc-camel-on-click="{{ c.onClick }}" style="height:20px;padding:0 7px;border:1px solid var(--border-subtle);border-radius:3px;font-size:11px;color:var(--text-secondary)" style-hover="border-color:var(--border-strong);color:var(--text-primary)">{{ c.label }}</button>
+</sc-for>
+</div>
+<div style="border:1px solid var(--border-strong);border-radius:3px;background:var(--bg-base);padding:7px 9px">
+<textarea value="{{ aiInput }}" sc-camel-on-change="{{ onAiInput }}" sc-camel-on-key-down="{{ onAiKey }}" placeholder="Ask about this database…" style="width:100%;height:44px;resize:none;font-size:13px;line-height:18px;background:transparent"></textarea>
+</div>
+<div style="display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--text-muted)">
+<span>{{ aiCtx }} · <span style="font-family:'IBM Plex Mono',monospace">⌘↵</span> to send</span>
+<button sc-camel-on-click="{{ sendAI }}" style="height:20px;padding:0 8px;border-radius:3px;background:var(--btn-primary);color:var(--text-inverse);font-size:11px;font-weight:500">Send</button>
+</div>
+</div>
+</div>
+</sc-if>
+</div>
+
+<div style="height:24px;flex:none;display:flex;align-items:center;gap:14px;padding:0 10px;background:var(--bg-raised);border-top:1px solid var(--border-subtle);font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">
+<span style="display:flex;align-items:center;gap:6px;color:var(--text-secondary)"><span style="{{ statusDotStyle }}"></span>{{ statusLabel }}</span>
+<span style="font-family:'IBM Plex Mono',monospace;text-transform:none;letter-spacing:0">public</span>
+<span style="font-family:'IBM Plex Mono',monospace;text-transform:none;letter-spacing:0">PostgreSQL 16.3</span>
+<span style="font-family:'IBM Plex Mono',monospace;text-transform:none;letter-spacing:0">{{ lastQuery }}</span>
+<span style="flex:1"></span>
+<span style="font-family:'IBM Plex Mono',monospace;text-transform:none;letter-spacing:0">{{ rowSummary }}</span>
+<span style="font-family:'IBM Plex Mono',monospace;text-transform:none;letter-spacing:0">{{ latency }}</span>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ reviewOpen }}" hint-placeholder-val="{{ false }}">
+<div sc-camel-on-click="{{ closeReview }}" style="position:fixed;inset:0;background:rgb(0 0 0 / .45);display:grid;place-items:center;z-index:60;padding:40px">
+<div sc-camel-on-click="{{ stop }}" style="width:100%;max-width:680px;max-height:100%;display:flex;flex-direction:column;background:var(--bg-overlay);border:1px solid var(--border-strong);border-radius:10px;box-shadow:var(--shadow);overflow:hidden">
+<div style="padding:14px 16px;border-bottom:1px solid var(--border-subtle);display:flex;align-items:center;gap:10px">
+<div style="font-size:16px;line-height:22px;font-weight:600">Review {{ pendingCount }} changes</div>
+<span style="flex:1"></span>
+<span style="font-size:12px;color:var(--text-muted)">one transaction · public.users</span>
+</div>
+<div style="flex:1;min-height:0;overflow:auto;padding:12px 16px;display:flex;flex-direction:column;gap:8px">
+<sc-for list="{{ pendingStmts }}" as="p" hint-placeholder-count="2">
+<div style="border:1px solid var(--border-subtle);border-radius:3px;display:flex;align-items:flex-start;gap:10px;padding:9px 10px;background:var(--bg-raised)">
+<span style="{{ p.kindStyle }}">{{ p.kind }}</span>
+<pre style="flex:1;margin:0;font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:18px;white-space:pre-wrap">{{ p.sql }}</pre>
+<button sc-camel-on-click="{{ p.onDiscard }}" style="font-size:11px;color:var(--text-muted)" style-hover="color:var(--danger)">discard</button>
+</div>
+</sc-for>
+</div>
+<div style="padding:12px 16px;border-top:1px solid var(--border-subtle);display:flex;align-items:center;gap:8px">
+<span style="font-size:12px;color:var(--text-secondary)">Runs inside <span style="font-family:'IBM Plex Mono',monospace">BEGIN … COMMIT</span>. Failure rolls everything back.</span>
+<span style="flex:1"></span>
+<button sc-camel-on-click="{{ closeReview }}" style="height:28px;padding:0 12px;border:1px solid var(--border-strong);border-radius:3px;font-size:13px">Cancel</button>
+<button sc-camel-on-click="{{ applyChanges }}" style="height:28px;padding:0 14px;border-radius:3px;background:var(--btn-primary);color:var(--text-inverse);font-size:13px;font-weight:500">Apply</button>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ modalOpen }}" hint-placeholder-val="{{ false }}">
+<div sc-camel-on-click="{{ closeModal }}" style="position:fixed;inset:0;background:rgb(0 0 0 / .45);display:grid;place-items:center;z-index:70;padding:40px">
+<div sc-camel-on-click="{{ stop }}" style="width:100%;max-width:840px;max-height:100%;display:flex;flex-direction:column;background:var(--bg-overlay);border:1px solid var(--border-strong);border-radius:10px;box-shadow:var(--shadow);overflow:hidden">
+<div style="padding:14px 16px;border-bottom:1px solid var(--border-subtle);font-size:16px;line-height:22px;font-weight:600">{{ modalTitle }}</div>
+<div style="flex:1;min-height:0;overflow:auto;display:flex">
+<div style="flex:1;min-width:0;padding:16px;display:flex;flex-direction:column;gap:18px;border-right:1px solid var(--border-subtle)">
+<div style="display:flex;flex-direction:column;gap:6px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Paste a connection string</div>
+<input value="{{ form.dsn }}" sc-camel-on-change="{{ onDsn }}" placeholder="postgresql://user:pass@host:5432/db" style="height:30px;padding:0 10px;background:var(--bg-raised);border:1px solid var(--border-strong);border-radius:3px;font-family:'IBM Plex Mono',monospace;font-size:13px">
+<div style="font-size:12px;color:var(--text-muted)">Pasting fills every field below.</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Connection</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+<sc-for list="{{ formFields }}" as="f" hint-placeholder-count="6">
+<label style="{{ f.wrapStyle }}">
+<span style="font-size:12px;color:var(--text-secondary)">{{ f.label }}</span>
+<input value="{{ f.value }}" sc-camel-on-change="{{ f.onChange }}" type="{{ f.type }}" placeholder="{{ f.ph }}" style="height:28px;padding:0 9px;background:var(--bg-raised);border:1px solid var(--border-strong);border-radius:3px;font-family:'IBM Plex Mono',monospace;font-size:13px">
+</label>
+</sc-for>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Identity</div>
+<div style="display:flex;align-items:center;gap:8px">
+<span style="font-size:12px;color:var(--text-secondary);width:92px">Display colour</span>
+<div style="display:flex;gap:6px">
+<sc-for list="{{ swatches }}" as="s" hint-placeholder-count="8">
+<button sc-camel-on-click="{{ s.onClick }}" style="{{ s.style }}"></button>
+</sc-for>
+</div>
+</div>
+<div style="display:flex;align-items:center;gap:8px">
+<span style="font-size:12px;color:var(--text-secondary);width:92px">Environment</span>
+<div style="display:flex;border:1px solid var(--border-subtle);border-radius:3px;overflow:hidden;height:24px">
+<sc-for list="{{ envSegs }}" as="s" hint-placeholder-count="4"><button sc-camel-on-click="{{ s.onClick }}" style="{{ s.style }}">{{ s.label }}</button></sc-for>
+</div>
+</div>
+<div style="display:flex;align-items:center;gap:8px">
+<span style="font-size:12px;color:var(--text-secondary);width:92px">Read-only</span>
+<button sc-camel-on-click="{{ toggleFormRO }}" style="{{ roTrackStyle }}"><span style="{{ roKnobStyle }}"></span></button>
+<span style="{{ roHintStyle }}">{{ roHint }}</span>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">SSL &amp; tunnel</div>
+<div style="display:flex;align-items:center;gap:10px">
+<span style="font-size:12px;color:var(--text-secondary)">Mode</span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:13px;padding:3px 8px;border:1px solid var(--border-strong);border-radius:3px">require ▾</span>
+<button style="font-size:12px;color:var(--state-info)">＋ SSH tunnel</button>
+</div>
+</div>
+</div>
+<div style="width:280px;flex:none;padding:16px;background:var(--bg-raised);display:flex;flex-direction:column;gap:14px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Summary</div>
+<div style="display:flex;align-items:stretch;gap:0;border:1px solid var(--border-subtle);border-radius:3px;overflow:hidden">
+<div style="{{ previewBarStyle }}"></div>
+<div style="padding:8px 10px;display:flex;flex-direction:column;gap:4px;min-width:0">
+<div style="display:flex;align-items:center;gap:8px"><span style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500">{{ form.name }}</span><span style="{{ previewEnvStyle }}">{{ previewEnv }}</span></div>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-secondary)">{{ previewDsn }}</span>
+</div>
+</div>
+<div style="{{ testBoxStyle }}">
+<div style="font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:18px;white-space:pre-wrap">{{ testText }}</div>
+<sc-if value="{{ testHint }}" hint-placeholder-val="{{ false }}">
+<div style="margin-top:6px;font-size:12px;line-height:17px;color:var(--text-secondary)">{{ testHintText }}</div>
+</sc-if>
+</div>
+<span style="flex:1"></span>
+<div style="font-size:12px;line-height:17px;color:var(--text-muted)">Passwords are encrypted at rest and never returned by the API.</div>
+</div>
+</div>
+<div style="padding:12px 16px;border-top:1px solid var(--border-subtle);display:flex;align-items:center;gap:8px">
+<button sc-camel-on-click="{{ testConn }}" style="height:28px;padding:0 12px;border:1px solid var(--border-strong);border-radius:3px;font-size:13px">Test connection</button>
+<span style="flex:1"></span>
+<button sc-camel-on-click="{{ closeModal }}" style="height:28px;padding:0 12px;border:1px solid var(--border-strong);border-radius:3px;font-size:13px">Cancel</button>
+<button sc-camel-on-click="{{ saveConn }}" style="height:28px;padding:0 14px;border-radius:3px;background:var(--btn-primary);color:var(--text-inverse);font-size:13px;font-weight:500">Save</button>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ confirmOpen }}" hint-placeholder-val="{{ false }}">
+<div sc-camel-on-click="{{ closeConfirm }}" style="position:fixed;inset:0;background:rgb(0 0 0 / .45);display:grid;place-items:center;z-index:80;padding:40px">
+<div sc-camel-on-click="{{ stop }}" style="width:100%;max-width:460px;background:var(--bg-overlay);border:1px solid var(--border-strong);border-top:3px solid var(--danger);border-radius:10px;box-shadow:var(--shadow);overflow:hidden">
+<div style="padding:16px;display:flex;flex-direction:column;gap:12px">
+<div style="font-size:16px;line-height:22px;font-weight:600;color:var(--danger)">{{ confirmTitle }}</div>
+<div style="font-size:14px;line-height:20px;color:var(--text-secondary)">{{ confirmBody }}</div>
+<pre style="margin:0;padding:9px 10px;background:var(--bg-inset);border:1px solid var(--border-subtle);border-radius:3px;font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:18px;white-space:pre-wrap">{{ confirmSql }}</pre>
+<div style="display:flex;flex-direction:column;gap:6px">
+<div style="font-size:12px;color:var(--text-secondary)">Type <span style="font-family:'IBM Plex Mono',monospace;color:var(--text-primary)">{{ confirmWord }}</span> to confirm.</div>
+<input value="{{ confirmInput }}" sc-camel-on-change="{{ onConfirmInput }}" style="height:28px;padding:0 10px;background:var(--bg-raised);border:1px solid var(--border-strong);border-radius:3px;font-family:'IBM Plex Mono',monospace;font-size:13px">
+</div>
+</div>
+<div style="padding:12px 16px;border-top:1px solid var(--border-subtle);display:flex;gap:8px;justify-content:flex-end">
+<button sc-camel-on-click="{{ closeConfirm }}" style="height:28px;padding:0 12px;border:1px solid var(--border-strong);border-radius:3px;font-size:13px">Cancel</button>
+<button sc-camel-on-click="{{ doConfirm }}" style="{{ confirmBtnStyle }}">{{ confirmAction }}</button>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ paletteOpen }}" hint-placeholder-val="{{ false }}">
+<div sc-camel-on-click="{{ closePalette }}" style="position:fixed;inset:0;background:rgb(0 0 0 / .40);display:flex;justify-content:center;padding-top:88px;z-index:90">
+<div sc-camel-on-click="{{ stop }}" style="width:100%;max-width:560px;max-height:60vh;display:flex;flex-direction:column;background:var(--bg-overlay);border:1px solid var(--border-strong);border-radius:10px;box-shadow:var(--shadow);overflow:hidden">
+<div style="display:flex;align-items:center;gap:8px;padding:0 12px;height:40px;border-bottom:1px solid var(--border-subtle)">
+<span style="color:var(--text-muted)">⌕</span>
+<input value="{{ paletteQ }}" sc-camel-on-change="{{ onPaletteQ }}" sc-camel-auto-focus="{{ true }}" placeholder="{{ palettePlaceholder }}" style="flex:1;font-size:14px">
+<span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted)">&gt; actions · @ objects · # history</span>
+</div>
+<div style="flex:1;min-height:0;overflow:auto;padding:6px 0">
+<sc-for list="{{ paletteRows }}" as="p" hint-placeholder-count="8">
+<div sc-camel-on-click="{{ p.onClick }}" style="{{ p.style }}" style-hover="background:var(--bg-hover)">
+<span style="{{ p.iconStyle }}">{{ p.icon }}</span>
+<span style="{{ p.labelStyle }}">{{ p.label }}</span>
+<span style="flex:1"></span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted)">{{ p.hint }}</span>
+</div>
+</sc-for>
+<sc-if value="{{ paletteEmpty }}" hint-placeholder-val="{{ false }}">
+<div style="padding:26px;text-align:center;color:var(--text-muted);font-size:13px">No results for “{{ paletteQ }}”.</div>
+</sc-if>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ ctxOpen }}" hint-placeholder-val="{{ false }}">
+<div sc-camel-on-click="{{ closeCtx }}" style="position:fixed;inset:0;z-index:95">
+<div sc-camel-on-click="{{ stop }}" style="{{ ctxStyle }}">
+<sc-for list="{{ ctxItems }}" as="i" hint-placeholder-count="6">
+<div sc-camel-on-click="{{ i.onClick }}" style="{{ i.style }}" style-hover="background:var(--bg-hover)">{{ i.label }}</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ notifOpen }}" hint-placeholder-val="{{ false }}">
+<div sc-camel-on-click="{{ closeNotif }}" style="position:fixed;inset:0;z-index:88">
+<div sc-camel-on-click="{{ stop }}" style="position:absolute;right:10px;top:44px;width:388px;max-height:70vh;display:flex;flex-direction:column;background:var(--bg-overlay);border:1px solid var(--border-strong);border-radius:8px;box-shadow:var(--shadow);overflow:hidden">
+<div style="height:32px;flex:none;display:flex;align-items:center;gap:8px;padding:0 11px;border-bottom:1px solid var(--border-subtle)">
+<span style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Notifications</span>
+<span style="flex:1"></span>
+<button sc-camel-on-click="{{ clearNotifs }}" style="font-size:12px;color:var(--text-secondary)" style-hover="color:var(--text-primary)">Mark all read</button>
+</div>
+<div style="flex:1;min-height:0;overflow:auto">
+<sc-for list="{{ notifRows }}" as="n" hint-placeholder-count="4">
+<div sc-camel-on-click="{{ n.onClick }}" style="{{ n.style }}" style-hover="background:var(--bg-hover)">
+<span style="{{ n.dotStyle }}"></span>
+<div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0">
+<span style="font-size:13px;line-height:18px">{{ n.title }}</span>
+<span style="font-size:12px;line-height:17px;color:var(--text-secondary)">{{ n.body }}</span>
+</div>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted);white-space:nowrap">{{ n.age }}</span>
+</div>
+</sc-for>
+<sc-if value="{{ notifEmpty }}" hint-placeholder-val="{{ false }}">
+<div style="padding:30px 16px;text-align:center;color:var(--text-muted);font-size:12px">Nothing needs you right now.</div>
+</sc-if>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ shortcutsOpen }}" hint-placeholder-val="{{ false }}">
+<div sc-camel-on-click="{{ closeShortcuts }}" style="position:fixed;inset:0;background:rgb(0 0 0 / .45);display:grid;place-items:center;z-index:100;padding:40px">
+<div sc-camel-on-click="{{ stop }}" style="width:100%;max-width:620px;max-height:100%;display:flex;flex-direction:column;background:var(--bg-overlay);border:1px solid var(--border-strong);border-radius:10px;box-shadow:var(--shadow);overflow:hidden">
+<div style="padding:13px 16px;border-bottom:1px solid var(--border-subtle);display:flex;align-items:center;gap:10px">
+<span style="font-size:16px;line-height:22px;font-weight:600">Keyboard</span>
+<span style="flex:1"></span>
+<button sc-camel-on-click="{{ closeShortcuts }}" style="color:var(--text-muted);font-size:12px" style-hover="color:var(--text-primary)">✕</button>
+</div>
+<div style="flex:1;min-height:0;overflow:auto;padding:14px 16px;display:grid;grid-template-columns:1fr 1fr;gap:18px 24px">
+<sc-for list="{{ shortcutGroups }}" as="g" hint-placeholder-count="4">
+<div style="display:flex;flex-direction:column;gap:6px">
+<div style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">{{ g.label }}</div>
+<sc-for list="{{ g.items }}" as="k" hint-placeholder-count="4">
+<div style="display:flex;align-items:baseline;gap:10px">
+<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-secondary);width:74px;flex:none;text-align:right">{{ k.keys }}</span>
+<span style="font-size:13px;line-height:18px;flex:1;min-width:0">{{ k.label }}</span>
+</div>
+</sc-for>
+</div>
+</sc-for>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ tooNarrow }}" hint-placeholder-val="{{ false }}">
+<div style="position:fixed;inset:0;z-index:120;background:var(--bg-base);display:grid;place-items:center;padding:32px">
+<div style="max-width:320px;text-align:center;display:flex;flex-direction:column;gap:10px;align-items:center">
+<div style="width:26px;height:26px;border:1.5px solid var(--text-primary);border-radius:3px;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr">
+<div style="border-right:1.5px solid var(--text-primary);border-bottom:1.5px solid var(--text-primary)"></div><div style="border-bottom:1.5px solid var(--text-primary)"></div><div style="border-right:1.5px solid var(--text-primary)"></div><div></div>
+</div>
+<div style="font-size:24px;line-height:30px;font-weight:600">Comb needs a wider window.</div>
+<div style="font-size:14px;line-height:20px;color:var(--text-secondary)">A data grid, a tree and an editor do not fit in {{ winW }}px. Widen to at least 900px — this is not a phone app, and pretending otherwise would make every other screen worse.</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ toastOpen }}" hint-placeholder-val="{{ false }}">
+<div style="{{ toastStyle }}">
+<span style="{{ toastIconStyle }}">{{ toastIcon }}</span>
+<div style="display:flex;flex-direction:column;gap:2px">
+<span style="font-size:13px;line-height:18px">{{ toastText }}</span>
+<sc-if value="{{ toastSub }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;line-height:17px;color:var(--text-secondary)">{{ toastSubText }}</span></sc-if>
+</div>
+<button sc-camel-on-click="{{ closeToast }}" style="color:var(--text-muted);font-size:12px" style-hover="color:var(--text-primary)">✕</button>
+</div>
+</sc-if>
+
+</div>
+</x-dc>

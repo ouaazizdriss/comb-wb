@@ -1,0 +1,6 @@
+apiVersion: v2
+name: comb
+description: Comb — a self-hosted PostgreSQL workbench
+type: application
+version: 1.5.0
+appVersion: "1.5.0"

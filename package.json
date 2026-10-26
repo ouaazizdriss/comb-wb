@@ -1,0 +1,26 @@
+{
+  "name": "comb",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "shared",
+    "server",
+    "web"
+  ],
+  "scripts": {
+    "dev:server": "npm -w server run dev",
+    "dev:web": "npm -w web run dev",
+    "build": "npm -w shared run build && npm -w server run build && npm -w web run build",
+    "typecheck": "npm -w shared run typecheck && npm -w server run typecheck && npm -w web run typecheck",
+    "test": "npm -w server run test"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true,
+    "esbuild@0.25.12": true,
+    "cpu-features": false,
+    "ssh2": false
+  },
+  "devDependencies": {
+    "playwright-core": "^1.64.1"
+  }
+}
