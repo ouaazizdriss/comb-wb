@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api, onAuthProblem, setCsrf } from '../lib/api.ts';
-import { useApp } from '../lib/store.ts';
+import { useApp, rememberedConnection } from '../lib/store.ts';
 import { AuthScreen, MfaEnrollScreen } from './Auth.tsx';
 import { Launcher } from './Launcher.tsx';
 import { Workspace } from './Workspace.tsx';
@@ -27,6 +27,17 @@ export function App() {
     return () => window.removeEventListener('resize', r);
   }, []);
 
+  // After a reload, go back to the connection this tab had open; its tabs restore from local storage.
+  const reopen = async () => {
+    const id = rememberedConnection();
+    if (!id || useApp.getState().conn) return;
+    try {
+      useApp.getState().openConnection(await api.post(`/connections/${id}/open`));
+    } catch {
+      useApp.getState().closeConnection();
+    }
+  };
+
   const boot = async () => {
     try {
       const st = await api.get('/auth/status');
@@ -35,6 +46,7 @@ export function App() {
       const me = await api.get('/auth/me');
       setCsrf(me.csrfToken);
       setMe(me);
+      if (!me.mfaEnrollRequired) await reopen();
       setPhase(me.mfaEnrollRequired ? 'enroll' : 'ready');
     } catch (e: any) {
       setPhase(e?.body?.mfa ? 'mfa' : 'login');
@@ -47,7 +59,7 @@ export function App() {
       if (body?.mfaEnroll) setPhase('enroll');
       else if (code === 401) {
         setMe(null);
-        useApp.getState().closeConnection();
+        useApp.getState().closeConnection({ keep: true });
         setPhase(body?.mfa ? 'mfa' : 'login');
       }
     });

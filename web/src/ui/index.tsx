@@ -295,12 +295,18 @@ export function Stat({ value, label, note, unit, tone }: { value: React.ReactNod
 
 export function Modal({ title, onClose, width = 560, children, footer }: { title: React.ReactNode; onClose: () => void; width?: number; children: React.ReactNode; footer?: React.ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
+  // Callers pass a fresh onClose on every render; read it through a ref so the effects below run once.
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
   useEffect(() => {
-    const k = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+    const k = (e: KeyboardEvent) => e.key === 'Escape' && closeRef.current();
     document.addEventListener('keydown', k);
-    ref.current?.querySelector<HTMLElement>('input,textarea,button')?.focus();
     return () => document.removeEventListener('keydown', k);
-  }, [onClose]);
+  }, []);
+  // Focus the first field when the dialog opens, never again while the user types.
+  useEffect(() => {
+    ref.current?.querySelector<HTMLElement>('input,textarea,button')?.focus();
+  }, []);
   return (
     <div onMouseDown={onClose} style={{ position: 'fixed', inset: 0, zIndex: 80, background: 'rgb(0 0 0 / 0.45)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: '9vh' }}>
       <div ref={ref} role="dialog" aria-modal="true" onMouseDown={(e) => e.stopPropagation()}

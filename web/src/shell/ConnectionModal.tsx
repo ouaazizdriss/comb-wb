@@ -41,13 +41,15 @@ export function ConnectionModal() {
   const close = () => set({ connModal: null });
   const up = (patch: Partial<Form>) => { setF((x) => ({ ...x, ...patch })); setTest(null); };
 
-  const onDsn = (v: string) => {
-    const p = parseDsn(v);
-    if (p) {
-      setF((x) => ({ ...x, dsn: '', host: p.host ?? x.host, port: String(p.port ?? 5432), db: p.db ?? x.db, user: p.user ?? x.user,
-        password: p.password ?? x.password, name: x.name || (p.db ?? ''), sslmode: p.sslmode ?? x.sslmode }));
-      if (p.password !== undefined) setPwTouched(true);
-    } else setF((x) => ({ ...x, dsn: v }));
+  // Fill the fields from a whole connection string: on paste, Enter or leaving the field, never mid-typing.
+  const applyDsn = (v: string): boolean => {
+    const p = parseDsn(v.trim());
+    if (!p) return false;
+    setF((x) => ({ ...x, dsn: '', host: p.host ?? x.host, port: String(p.port ?? 5432), db: p.db ?? x.db, user: p.user ?? x.user,
+      password: p.password ?? x.password, name: x.name || (p.db ?? ''), sslmode: p.sslmode ?? x.sslmode }));
+    if (p.password !== undefined) setPwTouched(true);
+    setTest(null);
+    return true;
   };
 
   const payload = () => ({
@@ -130,8 +132,12 @@ export function ConnectionModal() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
             <Label>Paste a connection string</Label>
-            <TextInput mono value={f.dsn} onChange={(e) => onDsn(e.target.value)} placeholder="postgresql://user:pass@host:5432/db" autoComplete="off" />
-            <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Pasting fills every field below. The string itself is not stored.</div>
+            <TextInput mono value={f.dsn} onChange={(e) => setF((x) => ({ ...x, dsn: e.target.value }))}
+              onPaste={(e) => { if (applyDsn(e.clipboardData.getData('text'))) e.preventDefault(); }}
+              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); applyDsn(f.dsn); } }}
+              onBlur={() => applyDsn(f.dsn)}
+              placeholder="postgresql://user:pass@host:5432/db" autoComplete="off" />
+            <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Optional. Paste, or type and press Enter, to fill the fields below — or fill them directly. The string itself is not stored.</div>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             <Label>Connection</Label>

@@ -76,7 +76,8 @@ interface State {
   toggleTheme: () => void;
   setDensity: (d: Density) => void;
   openConnection: (c: ConnectionSummary) => void;
-  closeConnection: () => void;
+  /** keep: leave the remembered connection so it reopens after the next sign-in. */
+  closeConnection: (opts?: { keep?: boolean }) => void;
   openTab: (kind: TabKind, title: string, params?: Record<string, any>, opts?: { unique?: boolean }) => string;
   closeTab: (id: string) => void;
   setActive: (id: string) => void;
@@ -88,6 +89,24 @@ interface State {
 
 let toastSeq = 1;
 let tabSeq = 1;
+
+/** The connection open in this browser tab, so a reload lands back in the workspace. */
+const OPEN_KEY = 'comb.openConnection';
+export function rememberedConnection(): string | null {
+  try {
+    return sessionStorage.getItem(OPEN_KEY);
+  } catch {
+    return null;
+  }
+}
+function rememberConnection(id: string | null): void {
+  try {
+    if (id) sessionStorage.setItem(OPEN_KEY, id);
+    else sessionStorage.removeItem(OPEN_KEY);
+  } catch {
+    /* private mode */
+  }
+}
 
 function persistTabs(connId: string | undefined, tabs: Tab[], active: string | null): void {
   if (connId) save('tabs.' + connId, { tabs, active });
@@ -130,9 +149,13 @@ export const useApp = create<State>((set, get) => ({
           { id: 't' + tabSeq++, kind: 'query' as const, title: 'untitled', params: {} },
           { id: 't' + tabSeq++, kind: 'erd' as const, title: 'public', params: { schema: 'public' } },
         ];
+    rememberConnection(c.id);
     set({ conn: c, tabs, active: saved?.active && tabs.some((t) => t.id === saved.active) ? saved.active : tabs[0]?.id ?? null });
   },
-  closeConnection: () => set({ conn: null, tabs: [], active: null }),
+  closeConnection: (opts) => {
+    if (!opts?.keep) rememberConnection(null);
+    set({ conn: null, tabs: [], active: null });
+  },
   openTab: (kind, title, params, opts) => {
     const { tabs, conn } = get();
     const unique = opts?.unique ?? !['query', 'table'].includes(kind);
