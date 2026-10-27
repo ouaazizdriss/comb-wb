@@ -1,5 +1,7 @@
 # Comb
 
+**[Take the interactive product tour →](https://ouaazizdriss.github.io/comb-wb/)**
+
 Comb is a self-hosted, browser-based workbench for PostgreSQL. It combines a SQL client (query editor,
 data grid, ERD) with the admin, governance and compliance tools a team needs around production
 databases: approvals, an audit trail, roles and privileges, monitoring, backups, a data catalog with
@@ -369,6 +371,7 @@ web/src/ui/                 UI kit
 deploy/helm/comb/           Helm chart
 docker/init/                development database bootstrap
 tools/                      dev scripts: dev.sh, seed.mjs, shot.mjs, module-dev.sh
+docs/index.html             the product tour, published with GitHub Pages
 docs/mockup/                the design reference the screens follow
 ```
 
